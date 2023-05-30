@@ -3,29 +3,191 @@
 #include <string>
 #include <vector>
 #include "Player.h"
-void displayGame(){
-    refresh();
-    int yMax, xMax;
-    getmaxyx(stdscr, yMax, xMax);
-    WINDOW * win = newwin(30, 50, yMax/2 - 15, xMax/2 - 25);
-    // wborder(win, '#','#', '#', '#', '#', '#', '#', '#');
+
+void sideWindow (WINDOW* win, const std::string & title, const std::vector<std::string>& msg){
+    werase(win);
     box(win, 0, 0);
-    Player p {win, 1, 1, '@'};
+    mvwprintw(win, 0, 1, "%s", title.c_str());
+    for(size_t i = 0; i < msg.size(); i++){
+        mvwprintw(win, i + 2, 1, "%s", msg.at(i).c_str());
+    }
+    wrefresh(win);
+}
+void Inventory(WINDOW * win, WINDOW * control, WINDOW * log){
+    int key, selected = 0;
+    std::vector<std::string> items = {
+        "axe",
+        "potion",
+        "bread",
+        "spear",
+        "empty",
+        "empty",
+    };
+    std::vector<std::string> controls = {
+        "Select:   <arrow key>",
+        "Use item: <e>",
+        "Close:    <i>",
+    };
+    
+    werase(win);
+    box(win, 0, 0);
+    mvwprintw(win, 0, 1, "Inventory");
 
-    do {
-        p.display();
+    WINDOW * inven = newwin(items.size() + 2, 15, 4, 3);
+    WINDOW * equip = newwin(8, 15, 4, 30);
+    box(inven, 0, 0);
+    box(equip, 0, 0);
+    mvwprintw(inven, 0, 1, "Backpack");
+    mvwprintw(equip, 0, 1, "Equipment");
+    sideWindow(control, "Control key", controls);
+    while(1){
+        for(size_t i = 0; i < items.size(); i++){
+            if((int)i == selected)
+                wattron(inven, A_STANDOUT);
+            mvwprintw(inven, i + 1, 2, "%s", items.at(i).c_str());
+            wattroff(inven, A_STANDOUT);
+        }
         wrefresh(win);
-    }while(p.getMove() != KEY_BACKSPACE);
-
+        wrefresh(inven);
+        wrefresh(equip);
+        key = wgetch(win);
+        if(key == 'i')
+            break;
+        switch (key)
+        {
+        case KEY_DOWN:
+            if(++selected > (int)items.size())
+                selected = 0;
+            break;
+        case KEY_UP:
+            if(--selected < 0)
+                selected = items.size() - 1;
+            break;
+        case 'e':
+            wmove(log, 1, 1);
+            wclrtoeol(log);
+            wprintw(log, "You used %s", items.at(selected).c_str());
+            wrefresh(log);
+            break;    
+        default:
+            break;
+        }
+    };
     wclear(win);
     wrefresh(win);
+}
+bool Warning(){
+    int yMax, xMax;
+    getmaxyx(stdscr, yMax, xMax);
+    int xSize = 30, ySize = 6;
+    WINDOW * win = newwin(ySize, xSize, yMax/2 - ySize/2, xMax/2 - xSize/2);
+    box(win, 0, 0);
+    bool choice = false;
+    keypad(win, true);
+    std:: string msg = "Do you want to quit?";
+    std:: string msg1 = "Yes, I want to quit";
+    std:: string msg2 = "No, I want to stay";
+
+    while(1){
+        mvwprintw(win, 1, (xSize - msg.size())/2, "%s", msg.c_str());
+
+        if(choice)
+            wattron(win, A_STANDOUT);
+        mvwprintw(win, 3, (xSize - msg1.size())/2, "%s", msg1.c_str());
+        wattroff(win, A_STANDOUT);
+
+        if(!choice)
+            wattron(win, A_STANDOUT);
+        mvwprintw(win, 4, (xSize - msg2.size())/2, "%s", msg2.c_str());
+        wattroff(win, A_STANDOUT);
+
+        int key = wgetch(win);
+        if (key == KEY_UP || key == KEY_DOWN)
+            choice ? choice = false : choice = true;
+
+        if(key == 10){
+            wclear(win);
+            wrefresh(win);
+            return choice;
+        }
+    }
+    
+}
+void displayGame(){
+    clear();
+    refresh();
+    // init main window
+    int xSize = 60, ySize = 20;
+    WINDOW * win = newwin(ySize, xSize, 1, 1);
+    // init log window
+    WINDOW * log = newwin(6, xSize, ySize + 1, 1);
+    box(log, 0, 0);
+    mvwprintw(log, 0, 1, "Game message");
+    // init side windows 
+    WINDOW * stat = newwin(10, 25, 1, xSize + 1); 
+    WINDOW * skill = newwin(8, 25, 11, xSize + 1);
+    WINDOW * control = newwin(8, 25, 19, xSize + 1);
+    //create player
+    Player p {win, 1, 1, '@'};
+
+    std::vector<std::string> guide = {
+        "Movement:  <arrow keys>",
+        "Inventory: <i>",
+        "Skill:     <s>",
+        "Quit:      <backspace>"
+    };
+    std::vector<std::string> skills = {
+        "Primary:   <1>",
+        "Magic:     <2>",
+        "Ultimate:  <3>",
+    };
+    std::vector<std::string> statName = {
+        "HP",
+        "Mana",
+        "Strength",
+        "Magic",
+        "Armor",
+        "Magic res",
+        "Point"
+    };
+    int statVal[7] = {200, 50, 20, 10, 10, 0, 0};
+    for(size_t i = 0; i < statName.size(); i++){
+        statName.at(i) += ": " ;
+        statName.at(i).append(std::to_string(statVal[i]));
+    }
+    int move; 
+    while(1){
+        box(win, 0, 0);
+        mvwprintw(win, 0, 1, "Game screen");
+        wrefresh(win);
+        // print map and entity here
+        p.display();
+        // messages
+        wrefresh(log);
+        // side windows
+        sideWindow(stat, "Stat", statName);
+        sideWindow(skill, "Skill set",skills);
+        sideWindow(control,"Control key",guide);
+        move = p.getMove();
+        if(move == KEY_BACKSPACE && Warning())
+            break;
+        if(move == 'i'){
+            Inventory(win, control, log);
+        }
+        if(move > '0' && move < '4'){
+            mvwprintw(log, 1,1, "You cast %s", skills.at(move-49).c_str());
+        }
+    };
+    clear();
+    refresh();
 }
 void createHero()
 {
     int selected = 0, type = 0;
     int yMax, xMax;
     getmaxyx(stdscr, yMax, xMax);
-    WINDOW *win = newwin(13, 25, yMax / 2 - 5, xMax / 2 + 10);
+    int ySize = 13, xSize = 25;
+    WINDOW * win = newwin(ySize, xSize, yMax / 2 - 5, xMax / 2 + 10);
     int winXMax = getmaxx(win);
     std::string name;
     std::string arrHero[3] = {"Warrior", "Wizard", "Archer"};
@@ -126,14 +288,14 @@ void createHero()
     wrefresh(win);
 }
 
-
 void displayMainMenu()
 {
     int yMax, xMax;
     getmaxyx(stdscr, yMax, xMax);
-    WINDOW *win = newwin(10, 20, yMax / 2 - 5, xMax / 2 - 10);
+    int ySize = 10, xSize = 20;
+    WINDOW *win = newwin(10, 20, yMax/2 - ySize/2, xMax/2 - xSize/2);
 
-    std::vector<std::string> Options = {"New Game", "Load Game", "Tutorial", "Exit"};
+    std::vector<std::string> Options = {"New Game", "Load Game", "Controls", "Exit"};
     int selected = 0;
 
     bool exit = false;
