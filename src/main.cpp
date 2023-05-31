@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Player.h"
+#include "include/Hero.h"
 
 void sideWindow (WINDOW* win, const std::string & title, const std::vector<std::string>& msg){
     werase(win);
@@ -23,6 +23,11 @@ void Inventory(WINDOW * win, WINDOW * control, WINDOW * log){
         "empty",
         "empty",
     };
+    std::vector<std::string> equipments = {
+        "Helmet",
+        "Plate",
+        "Weapon"
+    };
     std::vector<std::string> controls = {
         "Select:   <arrow key>",
         "Use item: <e>",
@@ -33,48 +38,91 @@ void Inventory(WINDOW * win, WINDOW * control, WINDOW * log){
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "Inventory");
 
-    WINDOW * inven = newwin(items.size() + 2, 15, 4, 3);
-    WINDOW * equip = newwin(8, 15, 4, 30);
+    WINDOW * inven = newwin(items.size() + 2, 20, 4, 3);
+    WINDOW * equip = newwin(8, 20, 4, 30);
     box(inven, 0, 0);
     box(equip, 0, 0);
     mvwprintw(inven, 0, 1, "Backpack");
     mvwprintw(equip, 0, 1, "Equipment");
     sideWindow(control, "Control key", controls);
+    bool inventory = true;
     while(1){
-        for(size_t i = 0; i < items.size(); i++){
-            if((int)i == selected)
-                wattron(inven, A_STANDOUT);
-            mvwprintw(inven, i + 1, 2, "%s", items.at(i).c_str());
-            wattroff(inven, A_STANDOUT);
+        keypad(inven, true);
+        keypad(equip, true);
+        if(inventory){
+            for(size_t i = 0; i < items.size(); i++){
+                if((int)i == selected)
+                    wattron(inven, A_STANDOUT);
+                mvwprintw(inven, i + 1, 2, "%s", items.at(i).c_str());
+                wattroff(inven, A_STANDOUT);
+            }
+            wrefresh(win);
+            wrefresh(inven);
+
+            key = wgetch(inven);
+            switch (key)
+            {
+            case KEY_DOWN:
+                if(++selected > (int)items.size() - 1)
+                    selected = 0;
+                break;
+            case KEY_UP:
+                if(--selected < 0)
+                    selected = items.size() - 1;
+                break;
+            case 's':
+                inventory = false;
+                selected = 0;
+                break;
+            case 'e':
+                wmove(log, 1, 1);
+                wclrtoeol(log);
+                wprintw(log, "You used %s", items.at(selected).c_str());
+                wrefresh(log);
+                break;    
+            default:
+                break;
+            }
+        }else{
+            for(size_t i = 0; i < equipments.size(); i++){
+                if((int)i == selected)
+                    wattron(equip, A_STANDOUT);
+                mvwprintw(equip, i + 1, 2, "%s", equipments.at(i).c_str());
+                wattroff(equip, A_STANDOUT);
+            }
+            wrefresh(win);
+            wrefresh(equip);
+
+            key = wgetch(equip);
+            switch (key)
+            {
+            case KEY_DOWN:
+                if(++selected > (int)equipments.size() - 1)
+                    selected = 0;
+                break;
+            case KEY_UP:
+                if(--selected < 0)
+                    selected = equipments.size() - 1;
+                break;
+            case 's':
+                inventory = true;
+                selected = 0;
+                break;
+            case 'e':
+                wmove(log, 1, 1);
+                wclrtoeol(log);
+                wprintw(log, "You used %s", items.at(selected).c_str());
+                wrefresh(log);
+                break;    
+            default:
+                break;
+            }
         }
-        wrefresh(win);
-        wrefresh(inven);
-        wrefresh(equip);
-        key = wgetch(win);
         if(key == 'i')
             break;
-        switch (key)
-        {
-        case KEY_DOWN:
-            if(++selected > (int)items.size())
-                selected = 0;
-            break;
-        case KEY_UP:
-            if(--selected < 0)
-                selected = items.size() - 1;
-            break;
-        case 'e':
-            wmove(log, 1, 1);
-            wclrtoeol(log);
-            wprintw(log, "You used %s", items.at(selected).c_str());
-            wrefresh(log);
-            break;    
-        default:
-            break;
-        }
+        
     };
-    wclear(win);
-    wrefresh(win);
+    werase(win);
 }
 bool Warning(){
     int yMax, xMax;
@@ -119,16 +167,17 @@ void displayGame(){
     // init main window
     int xSize = 60, ySize = 20;
     WINDOW * win = newwin(ySize, xSize, 1, 1);
+    keypad(win, true);
     // init log window
     WINDOW * log = newwin(6, xSize, ySize + 1, 1);
     box(log, 0, 0);
     mvwprintw(log, 0, 1, "Game message");
     // init side windows 
-    WINDOW * stat = newwin(10, 25, 1, xSize + 1); 
-    WINDOW * skill = newwin(8, 25, 11, xSize + 1);
-    WINDOW * control = newwin(8, 25, 19, xSize + 1);
-    //create player
-    Player p {win, 1, 1, '@'};
+    WINDOW * stat = newwin(10, 25, 1,xSize + 1); 
+    WINDOW * skill = newwin(8, 25, 11,xSize + 1);
+    WINDOW * control = newwin(8, 25, 19,xSize + 1);
+    //create Hero
+    Hero p {win, 1, 1, '@'};
 
     std::vector<std::string> guide = {
         "Movement:  <arrow keys>",
