@@ -28,4 +28,6 @@ public:
     bool useItem(size_t index);
     bool useSkill(size_t index);
     bool unequip(size_t index);
+    void openInventory();
+    
 };

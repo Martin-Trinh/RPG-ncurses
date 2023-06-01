@@ -10,7 +10,7 @@ typedef std::vector<std::string> vecStr;
 
 class Character
 {
-private:
+protected:
     WINDOW * m_Win;
     int m_XMax, m_YMax;
 
@@ -18,6 +18,9 @@ private:
     char m_Character;
     Position m_Pos;
     Stats m_Stats;
+    
+    int m_CurrHP;
+    int m_CurrMana;
 public:
     Character(WINDOW * win, const std::string& name, char character, int x, int y, const Stats &stats);
     bool moveUp();
@@ -25,6 +28,6 @@ public:
     bool moveRight();
     bool moveLeft();
     int getMove();
-    void displayCharacter ();
+    void displayCharacter () const;
    vecStr statsToVector() const;
 };

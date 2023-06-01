@@ -1,6 +1,6 @@
 #include "include/Skill.h"
 
-Skill::Skill (std::string name, int cooldown, int cost)
+Skill::Skill (const std::string& name, int cooldown, int cost)
     :m_Name{name}, m_Cooldown{cooldown}, m_Cost{cost} {}
 
 bool Skill::decreaseCooldown(){

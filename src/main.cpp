@@ -166,7 +166,7 @@ void displayGame(){
     clear();
     refresh();
     // init main window
-    int xSize = 60, ySize = 20;
+    int xSize = 60, ySize = 25;
     int startX = 1, startY = 1;
     WINDOW * win = newwin(ySize, xSize, startX, startY);
     keypad(win, true);

@@ -4,7 +4,11 @@
 
 class Potion: public Item{
 private:
+    int m_HP;
+    int m_Mana;
+    int m_Exp;
 public:
-    Potion(std::string name, char character, int x, int y);
-    virtual bool use(Hero & hero);
+    Potion(const std::string& name, char character, int x, int y,
+             int hp, int mana, int exp);
+    virtual bool use(Hero & hero) override;
 };

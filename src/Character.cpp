@@ -3,6 +3,8 @@
 Character::Character(WINDOW * win,const std::string& name,char character, int x, int y, const Stats& stats)
 : m_Win{win},m_Name{name}, m_Character{character}, m_Pos{x, y}, m_Stats{stats}{
     getmaxyx(m_Win, m_YMax, m_XMax);
+    m_CurrHP = m_Stats.m_HP;
+    m_CurrMana = m_Stats.m_Mana;
 }
 bool Character:: moveUp(){
     mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, ' ');
@@ -53,17 +55,17 @@ int Character:: getMove(){
     }
     return move;
 }
-void Character::displayCharacter(){
+void Character::displayCharacter() const{
     mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, m_Character);
 }
 vecStr Character::statsToVector() const{
         vecStr res;
         res.emplace_back("Name: " + m_Name);
-        res.emplace_back("HP: " + std::to_string(m_Stats.m_HP));
-        res.emplace_back("Mana: " + std::to_string(m_Stats.m_Mana));
+        res.emplace_back("HP: " + std::to_string(m_Stats.m_HP) + "/" + std::to_string(m_CurrHP));
+        res.emplace_back("Mana: " + std::to_string(m_Stats.m_Mana) + "/" + std::to_string(m_CurrMana));
         res.emplace_back("Strength: " + std::to_string(m_Stats.m_Strength));
         res.emplace_back("Magic: " + std::to_string(m_Stats.m_Magic));
         res.emplace_back("Armor: " + std::to_string(m_Stats.m_Armor));
         res.emplace_back("Resistance: "  + std::to_string(m_Stats.m_Resistance));
         return res;
-    }
+}
