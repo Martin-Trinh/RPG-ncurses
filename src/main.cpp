@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "include/Hero.h"
+#include "include/Stats.h"
 
 void sideWindow (WINDOW* win, const std::string & title, const std::vector<std::string>& msg){
     werase(win);
@@ -166,18 +167,21 @@ void displayGame(){
     refresh();
     // init main window
     int xSize = 60, ySize = 20;
-    WINDOW * win = newwin(ySize, xSize, 1, 1);
+    int startX = 1, startY = 1;
+    WINDOW * win = newwin(ySize, xSize, startX, startY);
     keypad(win, true);
     // init log window
-    WINDOW * log = newwin(6, xSize, ySize + 1, 1);
+    WINDOW * log = newwin(6, xSize, ySize + 1, startX);
     box(log, 0, 0);
     mvwprintw(log, 0, 1, "Game message");
     // init side windows 
-    WINDOW * stat = newwin(10, 25, 1,xSize + 1); 
-    WINDOW * skill = newwin(8, 25, 11,xSize + 1);
-    WINDOW * control = newwin(8, 25, 19,xSize + 1);
+    WINDOW * heroStats = newwin(10, 25, startY, xSize + 1); 
+    WINDOW * enemyStats = newwin(10, 25, startY, xSize + 1 + 25); 
+    WINDOW * skill = newwin(8, 25, startY + 10 , xSize + 1);
+    WINDOW * control = newwin(8, 25, startY + 18, xSize + 1);
     //create Hero
-    Hero p {win, 1, 1, '@'};
+    Stats wizardStats {};
+    Hero p {win, "wizard", '@', 1, 1, wizardStats};
 
     std::vector<std::string> guide = {
         "Movement:  <arrow keys>",
@@ -210,11 +214,12 @@ void displayGame(){
         mvwprintw(win, 0, 1, "Game screen");
         wrefresh(win);
         // print map and entity here
-        p.display();
+        p.displayCharacter();
         // messages
         wrefresh(log);
         // side windows
-        sideWindow(stat, "Stat", statName);
+        sideWindow(heroStats, " Hero Stats", p.statsToVector());
+        sideWindow(enemyStats, "Enemy Stats", p.statsToVector());
         sideWindow(skill, "Skill set",skills);
         sideWindow(control,"Control key",guide);
         move = p.getMove();

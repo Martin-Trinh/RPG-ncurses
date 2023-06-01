@@ -1,1 +1,0 @@
-build/main.o: src/main.cpp src/include/Hero.h src/include/Position.h

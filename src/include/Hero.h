@@ -1,23 +1,31 @@
 #pragma once
 
-#include <ncurses.h>
-#include "Position.h"
+#include "Character.h"
+#include "Item.h"
+#include "Skill.h"
+#include "Equipment.h"
 
-class Hero
-{
+
+
+typedef std::vector<Item*> vecItem;
+typedef std::vector<Equipment*> vecEquip;
+typedef std::vector<Skill*> vecSkill;
+
+class Hero: public Character{
 private:
-    WINDOW * m_Win;
-    int m_XMax, m_YMax;
-     
-    int m_X, m_Y;
-    char m_Hero;
-public:
-    Hero(WINDOW * win, int x = 1, int y = 1, char hero = '@');
-    bool moveUp();
-    bool moveDown();
-    bool moveRight();
-    bool moveLeft();
-    int getMove();
-    void display ();
-};
+    vecItem m_Inventory;
+    vecSkill m_Skills;
+    vecEquip m_Equipment;
 
+    size_t inventoryMax = 12;
+    size_t equipmentMax = 4;
+    int m_Exp = 0;
+    int m_Level = 1;
+public:
+    Hero(WINDOW * win, const std::string& name, char character, int x, int y, const Stats &stats);
+    bool addSkill(Skill * skill);
+    bool pickUp(Item* item);
+    bool useItem(size_t index);
+    bool useSkill(size_t index);
+    bool unequip(size_t index);
+};
