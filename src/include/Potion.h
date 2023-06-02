@@ -11,4 +11,5 @@ public:
     Potion(WINDOW* win, const std::string& name, char character, int x, int y,
              int hp, int mana, int exp);
     virtual bool use(Hero & hero) override;
+    virtual std::string toData() const override;
 };

@@ -15,7 +15,7 @@ Map::Map(std::string mapFile){
     inFile.close();
 }
 
-void Map::displayMap(WINDOW* win){
+void Map::display(WINDOW* win){
     int yMax, xMax;
     getmaxyx(win, yMax, xMax);
     if((int)m_Map.size() >= yMax)

@@ -6,3 +6,8 @@ Item::Item(WINDOW* win, const std::string& name, char character, int x, int y)
 void Item::displayItem() const{
     mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, m_Character);
 }
+std::string Item::toData() const{
+    std::stringstream res;
+    res << m_Name << ',' << m_Character << ',' << m_Pos.toData();
+    return res.str();
+}    

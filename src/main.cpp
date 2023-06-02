@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "include/Hero.h"
 #include "include/Stats.h"
 #include "include/Map.h"
@@ -182,7 +183,7 @@ void displayGame(){
     WINDOW * control = newwin(8, 25, startY + 18, xSize + 1);
     //create Hero
     Stats wizardStats {};
-    Hero p {win, "wizard", '@', 1, 1, wizardStats};
+    Hero p {win, "wizard", 1, 1, wizardStats};
 
     std::vector<std::string> guide = {
         "Movement:  <arrow keys>",
@@ -214,10 +215,10 @@ void displayGame(){
     while(1){
         box(win, 0, 0);
         mvwprintw(win, 0, 1, "Game screen");
-        map.displayMap(win);
+        map.display(win);
         wrefresh(win);
         // print map and entity here
-        p.displayCharacter();
+        p.displayHero();
         // messages
         wrefresh(log);
         // side windows
@@ -397,13 +398,29 @@ void displayMainMenu()
 
 int main()
 {
-    initscr();
-    noecho();
-    cbreak();
-    curs_set(0);
+    // initscr();
+    // noecho();
+    // cbreak();
+    // curs_set(0);
 
-    displayMainMenu();
+    // displayMainMenu();
 
-    endwin();
+    // endwin();
+    int xSize = 62, ySize = 25;
+    int startX = 1, startY = 1;
+    WINDOW * win = newwin(ySize, xSize, startX, startY);
+    Stats wizardStat {100, 100, 3, 10, 3, 5};
+    Stats warriorStat{100, 100, 7, 0, 11, 1};
+    Stats archerStat {100, 100, 10, 5, 3, 2};
+
+    int pos [2] = {3, 3};
+    Hero wizard {win, "Wizard", pos[0], pos[1], wizardStat};
+    Hero warrior{win, "Warrior", pos[0], pos[1], warriorStat};
+    Hero archer {win, "Archer", pos[0], pos[1], archerStat};
+
+
+    std::cout << wizard.toData();
+    std::cout << warrior.toData();
+    std::cout << archer.toData();
     return 0;
 }

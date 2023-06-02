@@ -1,7 +1,7 @@
 #include "include/Character.h"
 
-Character::Character(WINDOW * win,const std::string& name,char character, int x, int y, const Stats& stats)
-: m_Win{win},m_Name{name}, m_Character{character}, m_Pos{x, y}, m_Stats{stats}{
+Character::Character(WINDOW * win,const std::string& name, int x, int y, const Stats& stats)
+: m_Win{win},m_Name{name}, m_Pos{x, y}, m_Stats{stats}{
     getmaxyx(m_Win, m_YMax, m_XMax);
     m_CurrHP = m_Stats.m_HP;
     m_CurrMana = m_Stats.m_Mana;
@@ -55,9 +55,7 @@ int Character:: getMove(){
     }
     return move;
 }
-void Character::displayCharacter() const{
-    mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, m_Character);
-}
+
 vecStr Character::statsToVector() const{
         vecStr res;
         res.emplace_back("Name: " + m_Name);
@@ -68,4 +66,12 @@ vecStr Character::statsToVector() const{
         res.emplace_back("Armor: " + std::to_string(m_Stats.m_Armor));
         res.emplace_back("Resistance: "  + std::to_string(m_Stats.m_Resistance));
         return res;
+}
+std::string Character::toData() const{
+    std::stringstream res;
+    res << m_Name << ","
+    << m_Pos.toData() 
+    << m_Stats.toData()
+    << m_CurrHP << "," << m_CurrMana;
+    return res.str();
 }

@@ -6,3 +6,8 @@ Equipment::Equipment(WINDOW* win, const std::string& name, char character, int x
 bool Equipment::use(Hero& hero){
     return true;
 }
+std::string Equipment::toData()const{
+    std::stringstream res;
+    res << Item::toData() << m_Buff.toData() << ',' << m_Durability;
+    return res.str();
+}

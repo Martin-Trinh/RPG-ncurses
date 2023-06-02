@@ -11,4 +11,5 @@ public:
     Equipment(WINDOW* win, const std::string& name, char character, int x, int y, 
                 const Stats& buff, int durability);
     virtual bool use(Hero& hero) override;
+    virtual std::string toData() const override;
 };

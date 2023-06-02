@@ -17,4 +17,5 @@ public:
     Item(WINDOW* win, const std::string& name, char character, int x, int y);
     void displayItem() const;
     virtual bool use(Hero & hero) = 0;
+    virtual std::string toData() const;
 };

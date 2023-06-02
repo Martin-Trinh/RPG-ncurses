@@ -9,3 +9,8 @@ bool Skill::decreaseCooldown(){
     m_Cooldown--;
     return true;
 }
+std::string Skill::toData() const{
+    std::stringstream res;
+    res << m_Name << ',' << m_Cooldown << ',' << m_Cost;
+    return res.str();
+}

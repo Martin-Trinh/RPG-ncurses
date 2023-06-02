@@ -21,7 +21,8 @@ private:
 
 public:
     Map(std::string mapFile);
-    void displayMap(WINDOW* win);
+    int save(std::string file);
+    void display(WINDOW* win);
     int removeMonster();
     int removeItem();
 };
