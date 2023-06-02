@@ -8,7 +8,7 @@ private:
     Stats m_Buff;
     int m_Durability = 5;
 public:
-    Equipment(const std::string& name, char character, int x, int y, 
+    Equipment(WINDOW* win, const std::string& name, char character, int x, int y, 
                 const Stats& buff, int durability);
     virtual bool use(Hero& hero) override;
 };

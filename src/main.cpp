@@ -4,6 +4,7 @@
 #include <vector>
 #include "include/Hero.h"
 #include "include/Stats.h"
+#include "include/Map.h"
 
 void sideWindow (WINDOW* win, const std::string & title, const std::vector<std::string>& msg){
     werase(win);
@@ -166,7 +167,7 @@ void displayGame(){
     clear();
     refresh();
     // init main window
-    int xSize = 60, ySize = 25;
+    int xSize = 62, ySize = 25;
     int startX = 1, startY = 1;
     WINDOW * win = newwin(ySize, xSize, startX, startY);
     keypad(win, true);
@@ -175,9 +176,9 @@ void displayGame(){
     box(log, 0, 0);
     mvwprintw(log, 0, 1, "Game message");
     // init side windows 
-    WINDOW * heroStats = newwin(10, 25, startY, xSize + 1); 
-    WINDOW * enemyStats = newwin(10, 25, startY, xSize + 1 + 25); 
-    WINDOW * skill = newwin(8, 25, startY + 10 , xSize + 1);
+    WINDOW * heroStats = newwin(10, 20, startY, xSize + 1); 
+    WINDOW * enemyStats = newwin(10, 20, startY, xSize + 1 + 20); 
+    WINDOW * skill = newwin(8, 20, startY + 10 , xSize + 1);
     WINDOW * control = newwin(8, 25, startY + 18, xSize + 1);
     //create Hero
     Stats wizardStats {};
@@ -208,10 +209,12 @@ void displayGame(){
         statName.at(i) += ": " ;
         statName.at(i).append(std::to_string(statVal[i]));
     }
+    Map map {"map1.txt"};
     int move; 
     while(1){
         box(win, 0, 0);
         mvwprintw(win, 0, 1, "Game screen");
+        map.displayMap(win);
         wrefresh(win);
         // print map and entity here
         p.displayCharacter();
