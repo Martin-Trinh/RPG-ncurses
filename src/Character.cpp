@@ -1,77 +1,55 @@
 #include "include/Character.h"
 
-Character::Character(WINDOW * win,const std::string& name, int x, int y, const Stats& stats)
-: m_Win{win},m_Name{name}, m_Pos{x, y}, m_Stats{stats}{
-    getmaxyx(m_Win, m_YMax, m_XMax);
-    m_CurrHP = m_Stats.m_HP;
-    m_CurrMana = m_Stats.m_Mana;
-}
-bool Character:: moveUp(){
-    mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, ' ');
-    if(--m_Pos.m_Y > 0)
-        return true;    
-    ++m_Pos.m_Y;
-    return false;
-}
-bool Character:: moveDown(){
-    mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, ' ');
-    if(++m_Pos.m_Y < m_YMax - 1)
-        return true;
-    --m_Pos.m_Y;
-    return false;
-}
-bool Character:: moveRight(){
-    mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, ' ');
-    if(++m_Pos.m_X < m_XMax - 1)
-        return true;
-    --m_Pos.m_X;
-    return false;
-}
-bool Character:: moveLeft(){
-    mvwaddch(m_Win, m_Pos.m_Y, m_Pos.m_X, ' ');
-    if(--m_Pos.m_X > 0)
-        return true;
-    ++m_Pos.m_X;
-    return false;
-}
-int Character:: getMove(){
-    int move = wgetch(m_Win);
-    switch (move)
-    {
-    case KEY_UP:
-        this->moveUp();
-        break;
-    case KEY_DOWN:
-        this->moveDown();
-        break;
-    case KEY_RIGHT:
-        this->moveRight();
-        break;
-    case KEY_LEFT:
-        this->moveLeft();
-        break;
-    default:
-        break;
-    }
-    return move;
+Character::Character(const std::string &name, int x, int y, const Stats &stats)
+    : m_Name{name}, m_Pos{x, y}, m_Stats{stats}
+{
+    m_CurrHP = m_Stats.getHP();
+    m_CurrMana = m_Stats.getMana();
 }
 
-vecStr Character::statsToVector() const{
-        vecStr res;
-        res.emplace_back("Name: " + m_Name);
-        res.emplace_back("HP: " + std::to_string(m_Stats.m_HP) + "/" + std::to_string(m_CurrHP));
-        res.emplace_back("Mana: " + std::to_string(m_Stats.m_Mana) + "/" + std::to_string(m_CurrMana));
-        res.emplace_back("Strength: " + std::to_string(m_Stats.m_Strength));
-        res.emplace_back("Magic: " + std::to_string(m_Stats.m_Magic));
-        res.emplace_back("Armor: " + std::to_string(m_Stats.m_Armor));
-        res.emplace_back("Resistance: "  + std::to_string(m_Stats.m_Resistance));
-        return res;
-}
-std::string Character::toData() const{
+Position Character:: getPos() const {return m_Pos;}
+
+std::string Character::toData() const
+{
     std::stringstream res;
     res << m_Name << ","
-    << m_Pos.toData() 
-    << m_Stats.toData()
-    << m_CurrHP << "," << m_CurrMana;
+        << m_Pos.toData()
+        << m_Stats.toData()
+        << m_CurrHP << "," << m_CurrMana;
     return res.str();
 }
+
+void Character::attack(Character *other, int damage, bool magical)
+{
+    if (magical)
+    {
+        other->m_CurrHP -= (damage + other->m_Stats.getResistance());
+    }
+    else
+    {
+        other->m_CurrHP -= (damage - other->m_Stats.getArmor());
+    }
+    if (other->m_CurrHP < 0)
+        other->m_CurrHP = 0;
+}
+
+void Character::statsBuff(const Stats &stat)
+{
+    m_Stats += stat;
+}
+void Character::increaseHP(int amount){
+    if(amount < 0)
+        amount = 0;
+    m_CurrHP += amount;
+    if(m_CurrHP > m_Stats.getHP())
+        m_CurrHP = m_Stats.getHP();
+}
+void Character::increaseMana(int amount){
+    if(amount < 0)
+        amount = 0;
+    m_CurrMana += amount;
+    if(m_CurrMana > m_Stats.getMana())
+        m_CurrMana = m_Stats.getMana();
+}
+int Character::getCurrHP() const{return m_CurrHP;}
+int Character::getCurrMana() const{return m_CurrMana;}

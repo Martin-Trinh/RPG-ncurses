@@ -6,14 +6,11 @@
 #include <string>
 #include <vector>
 
-typedef std::vector<std::string> vecStr;
+typedef std::vector<std::string> vecStr;    
 
 class Character
 {
 protected:
-    WINDOW * m_Win;
-    int m_XMax, m_YMax;
-
     std::string m_Name;
     Position m_Pos;
     Stats m_Stats;
@@ -21,12 +18,19 @@ protected:
     int m_CurrHP;
     int m_CurrMana;
 public:
-    Character(WINDOW * win, const std::string& name, int x, int y, const Stats &stats);
-    bool moveUp();
-    bool moveDown();
-    bool moveRight();
-    bool moveLeft();
-    int getMove();
+    Character(const std::string& name, int x, int y, const Stats &stats);
+
+
+    void statsBuff(const Stats& stat);
+    void increaseHP(int amount);
+    void increaseMana(int amount);
+
+    void attack(Character * other, int damage, bool magical);
+    char move(WINDOW* win, int x, int y);
+
+    //getters 
+    Position getPos() const;
+    int getCurrHP() const;
+    int getCurrMana() const;
     std::string toData() const;
-    vecStr statsToVector() const;
 };

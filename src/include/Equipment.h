@@ -6,10 +6,10 @@
 class Equipment: public Item{
 private:
     Stats m_Buff;
-    int m_Durability = 5;
+    int m_Durability;
 public:
-    Equipment(WINDOW* win, const std::string& name, char character, int x, int y, 
-                const Stats& buff, int durability);
-    virtual bool use(Hero& hero) override;
+    Equipment(const std::string& name,char character, int x, int y, 
+                const Stats& buff, int durability = 5);
+    virtual bool use(Hero* hero) override;
     virtual std::string toData() const override;
 };

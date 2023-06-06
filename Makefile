@@ -57,4 +57,3 @@ build/%.dep: src/%.cpp src/*
 	${CXX} -MM -MT $(patsubst src/%.cpp, build/%.o, $<) $< > $@
 
 include ${DEPS}
-

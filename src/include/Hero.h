@@ -7,33 +7,40 @@
 
 #include <array>
 
-typedef std::vector<Item*> vecItem;
-typedef std::vector<Equipment*> vecEquip;
-typedef std::vector<Skill*> vecSkill;
 
 class Hero: public Character{
 private:
+
     int m_Exp = 0;
+    int m_NextLevelExp = 10;
     int m_Level = 1;
 
-    static size_t inventoryMax;
-    static size_t skillMax;
-    static size_t equipmentMax;
+    static const size_t inventoryMax = 12;
+    static const size_t skillMax = 3;
+    static const size_t equipmentMax = 6;
 
-    vecItem m_Inventory;
-    vecEquip m_Skills;
-    vecSkill m_Equipment;
+    std::vector<Item*> m_Inventory;
+    std::vector<Skill*> m_Skills;
+    std::array<Equipment*, equipmentMax> m_Equipments;
 
 public:
-    Hero(WINDOW * win, const std::string& name, int x, int y, const Stats &stats);
+    Hero(const std::string& name, int x, int y, const Stats &stats);
+    ~Hero();
+
+    void gainExp(int amount);
+
+    void openInventory(WINDOW * win, WINDOW *control, WINDOW* log);
+    char move(WINDOW* win, int x, int y);
+
     bool addSkill(Skill * skill);
-    void levelUp();
-    bool pickUp(Item* item);
+    bool addItem(Item* item);
     bool useItem(size_t index);
-    bool useSkill(size_t index);
+    bool useSkill(size_t index, Character* monster);
     bool unequip(size_t index);
-    void openInventory();
-    void displayHero() const;
+
+    void displayHero(WINDOW* win) const;
+    void displayStats(WINDOW* win) const;
+    void displaySkill(WINDOW* win) const;
     std::string toData() const;
     
 };

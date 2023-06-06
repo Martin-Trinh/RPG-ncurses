@@ -7,14 +7,35 @@ Stats::Stats(int HP, int mana, int strength, int magic, int armor, int resistanc
       m_Magic{magic},
       m_Armor{armor},
       m_Resistance{resistance}
-{}
-std::string Stats::toData() const{
+{
+}
+
+int Stats::getHP() const { return m_HP; }
+int Stats::getMana() const { return m_Mana; }
+int Stats::getStrength() const { return m_Strength; }
+int Stats::getMagic() const { return m_Magic; }
+int Stats::getArmor() const { return m_Armor; }
+int Stats::getResistance() const { return m_Resistance; }
+
+Stats &Stats::operator+=(const Stats &rhs)
+{
+  m_HP += rhs.m_HP;
+  m_Mana += rhs.m_Mana;
+  m_Strength += rhs.m_Strength;
+  m_Magic += rhs.m_Magic;
+  m_Armor += rhs.m_Armor;
+  m_Resistance += rhs.m_Resistance;
+  return *this;
+}
+
+std::string Stats::toData() const
+{
   std::stringstream res;
-  res << m_HP << "," 
-    << m_Mana << "," 
-    << m_Strength << "," 
-    << m_Magic << ","
-    << m_Armor << ","
-    << m_Resistance;
-    return res.str();
+  res << m_HP << ","
+      << m_Mana << ","
+      << m_Strength << ","
+      << m_Magic << ","
+      << m_Armor << ","
+      << m_Resistance;
+  return res.str();
 }
