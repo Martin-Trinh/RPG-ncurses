@@ -16,29 +16,32 @@ Map::Map(const std::string& mapFile){
     inFile.close();
 }
 void Map::loadEntity(const std::string &name,const Stats& stats){
-    bool heroFound = true;
+    int hero = 0;
     for(size_t i = 0; i < m_Map.size(); i++){
         for(size_t j = 0; j < m_Map.at(i).size(); j++){
             char tile = m_Map.at(i).at(j);
             if(tile == '@'){
-                heroFound = true;
-                m_Hero = new Hero{name,(int) (j + m_Margin), (int)(i + m_Margin), stats};
+                hero++;
+                m_Hero = new Hero{name, (int)(j + m_Margin), (int)(i + m_Margin), stats};
                 m_Map.at(i).at(j) = '.';
-            }else if(tile == '?' || tile == '+'){
-
+            }else if(tile == '-' || tile == '+'){
+                m_Gates.push_back(new Gate{tile, (int)(j + m_Margin), (int)(i + m_Margin), false});
+                m_Map.at(i).at(j) = '.';
             }else if(m_CharItems.find(tile) != m_CharItems.end()){
-                addItem(tile,j + m_Margin, i + m_Margin);
+                addItem(tile, j + m_Margin, i + m_Margin);
                 m_Map.at(i).at(j) = '.';
             }else if(m_CharMonster.find(tile) != m_CharMonster.end()){
-                addMonster(tile,j + m_Margin, i + m_Margin);
+                addMonster(tile, j + m_Margin, i + m_Margin);
                 m_Map.at(i).at(j) = '.';
             }else if (tile != '#' && tile != '.' && tile != ' '){
                 throw std::string {"Uknown character on map: "} + tile; 
             }
         }
     }
-    if(!heroFound){
+    if(hero == 0){
         throw "Hero not found";
+    }else if(hero > 2){
+        throw "More than 1 hero ono map";
     }
 }
 void Map::addMonster(char tile, int x, int y){
@@ -87,16 +90,16 @@ void Map::addItem(char tile, int x, int y){
         case 'e':
             m_Items.push_back(new Potion{"exp", tile, x, y, 0, 0, 10});
             break;
+        //key
+        case '?':
+            m_Items.push_back(new Key{"key", tile, x, y, &m_Gates});
+            break;
     default:
         break;
     }
 }
-void Map::removeItem(){
-}
-void Map::removeMonster(){
-}
 
-int Map::getKey(WINDOW* win, WINDOW* control, WINDOW* log){
+int Map::getKey(WINDOW* win, WINDOW* control){
     int move = wgetch(win);
     char target;
     switch (move)
@@ -114,44 +117,39 @@ int Map::getKey(WINDOW* win, WINDOW* control, WINDOW* log){
         target = m_Hero->move(win, m_Hero->getPos().m_X - 1, m_Hero->getPos().m_Y);
         break;
     case 'i':
-        m_Hero->openInventory(win, control, log);
+        m_Hero->openInventory(win, control);
         break;
-    // case '1':
-    // case '2':
-    // case '3':
-    //     this->useSkill(0, findMon)
     default:
         break;
     }
     if(m_CharItems.find(target) != m_CharItems.end()){
-        Item* item = this->findItem(m_Hero->getPos());
-        if(item){
-            m_Hero->addItem(item);
-            this->removeItem();
+        size_t index = this->findItem(m_Hero->getPos());
+        if(index != m_Items.size() && m_Hero->addItem(m_Items.at(index))){
+            m_Items.erase(m_Items.begin() + index);
         }
     }else if(m_CharMonster.find(target) != m_CharMonster.end()){
-        Monster * monster = this->findMonster(m_Hero->getPos());
-       if(monster)
-            this->removeMonster();
+        size_t index = this->findMonster(m_Hero->getPos());
+       if(index != m_Monsters.size()){
+
+       }
             // enter combat
     }
     return move;
 }
-Item* Map::findItem(Position pos)const{
+size_t Map::findItem(Position pos) const{
     for(size_t i = 0; i < m_Items.size(); i++){
         if(m_Items.at(i)->getPos() == pos)
-            return m_Items.at(i);
+            return i;
     }
-    return NULL;
+    return m_Items.size();
 }
-Monster* Map::findMonster(Position pos)const{
+size_t Map::findMonster(Position pos)const{
     for(size_t i = 0; i < m_Monsters.size(); i++){
         if(m_Monsters.at(i)->getPos() == pos)
-            return m_Monsters.at(i);
+            return i;
     }
-    return NULL;
+    return m_Monsters.size();
 }
-
 Hero* Map::getHero()const { return m_Hero;}
 void Map::display(WINDOW* win){
     int yMax, xMax;
@@ -164,6 +162,9 @@ void Map::display(WINDOW* win){
             throw "Invalid map size";
         mvwprintw(win, i + m_Margin, m_Margin, "%s", m_Map.at(i).c_str());
     }
+    //display gates
+    for(size_t i = 0; i < m_Gates.size(); i++)
+        m_Gates.at(i)->displayGate(win);
     // display items
     for(size_t i = 0; i < m_Items.size(); i++)
         m_Items.at(i)->displayItem(win);

@@ -2,14 +2,16 @@
 
 #include "Item.h"
 #include "Stats.h"
+#include "Hero.h"
 
 class Equipment: public Item{
-private:
-    Stats m_Buff;
-    int m_Durability;
 public:
     Equipment(const std::string& name,char character, int x, int y, 
-                const Stats& buff, int durability = 5);
-    virtual bool use(Hero* hero) override;
+                const Stats& buff);
+    virtual bool use(Hero* hero, std::string& outMsg) override;
     virtual std::string toData() const override;
+    // getters
+    const Stats& getBuff() const;
+private:
+    Stats m_Buff;
 };

@@ -1,5 +1,6 @@
 #pragma once 
 
+
 #include <ncurses.h>
 #include <iostream>
 #include <string>
@@ -10,6 +11,8 @@
 #include "Map.h"
 #include "Potion.h"
 #include "Monster.h"
+#include "LogMsg.h"
+
 
 class Game{
 private:

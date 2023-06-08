@@ -27,6 +27,16 @@ Stats &Stats::operator+=(const Stats &rhs)
   m_Resistance += rhs.m_Resistance;
   return *this;
 }
+Stats &Stats::operator-=(const Stats &rhs)
+{
+  m_HP -= rhs.m_HP;
+  m_Mana -= rhs.m_Mana;
+  m_Strength -= rhs.m_Strength;
+  m_Magic -= rhs.m_Magic;
+  m_Armor -= rhs.m_Armor;
+  m_Resistance -= rhs.m_Resistance;
+  return *this;
+}
 
 std::string Stats::toData() const
 {

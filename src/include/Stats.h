@@ -31,6 +31,7 @@ public:
     int getResistance ()const;
     // increase stats
     Stats& operator += (const Stats& rhs);
+    Stats& operator -= (const Stats& rhs);
     // data for saving into file
     std::string toData() const;
 };

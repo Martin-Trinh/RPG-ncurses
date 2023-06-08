@@ -1,7 +1,8 @@
 #pragma once
 
-// #include "Hero.h"
 #include "Position.h"
+#include "Character.h"
+// #include "Hero.h"
 #include <ncurses.h>
 #include <string>
 class Hero;
@@ -19,7 +20,8 @@ public:
     Position getPos()const;
     const std::string& getName()const;
     
-    virtual bool use(Hero* hero) = 0;
+    virtual bool use(Hero* hero, std::string& outMsg) = 0;
     virtual void displayItem(WINDOW * win) const;
     virtual std::string toData() const;
+    bool operator == (const Item& other) const;
 };

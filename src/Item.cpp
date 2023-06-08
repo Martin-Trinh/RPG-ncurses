@@ -14,4 +14,7 @@ std::string Item::toData() const{
     std::stringstream res;
     res << m_Name << ',' << m_Pos.toData();
     return res.str();
-}    
+}   
+bool Item::operator == (const Item& other) const{
+    return m_Pos == other.m_Pos;
+}

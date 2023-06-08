@@ -21,26 +21,24 @@ void Game::displayGame(){
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "Game screen");
     // init log window
-    WINDOW *log = newwin(6, xSize, ySize + 1, startX);
-    box(log, 0, 0);
-    mvwprintw(log, 0, 1, "Game message");
+    LogMsg * log = new LogMsg( xSize, 6, startX, ySize + 1, 3);
     // init side windows
     WINDOW *heroStats = newwin(11, 20, startY, xSize + 1);
     WINDOW *enemyStats = newwin(10, 20, startY, xSize + 1 + 20);
-    WINDOW *skill = newwin(8, 20, startY + 10, xSize + 1);
-    WINDOW *control = newwin(10, 25, startY + 18, xSize + 1);
+    WINDOW *skill = newwin(8, 20, startY + 11, xSize + 1);
+    WINDOW *control = newwin(10, 25, startY + 19, xSize + 1);
     int move;
     bool running = true;
     try{
-        
-        wrefresh(log);
+        log->displayMsg("Welcome to the game!");
+        m_Map->getHero()->addLogWin(log);
         m_Map->display(win);
         m_Map->getHero()->displaySkill(skill);
         m_Map->getHero()->displayStats(heroStats);
         this->displayControl(control);
         while (running)
         {
-            move = m_Map->getKey(win, control, log);
+            move = m_Map->getKey(win, control);
             switch (move)
             {
             case KEY_BACKSPACE:
@@ -57,12 +55,18 @@ void Game::displayGame(){
             m_Map->display(win);
             m_Map->getHero()->displayStats(heroStats);
             this->displayControl(control);
-            wrefresh(log);
         };
 
     }catch(const std::string& e){
         clear();
 		mvprintw(0, 0, "%s",e.c_str());
+		refresh();
+		getch();
+        endwin();
+		std::cout << "Error: " << e << std::endl;
+    }catch(const char * e){
+        clear();
+		mvprintw(0, 0, "%s", e);
 		refresh();
 		getch();
         endwin();
@@ -75,16 +79,15 @@ void Game::displayGame(){
 void Game::displayControl(WINDOW* win) const{
     werase(win);
     box(win, 0, 0);
-    static std::string guide[7] = {
-        "Movement:  <arrow keys>",
-        "Inventory: <i>",
-        "Skill 1:   <1>",
-        "Skill 2:   <2>",
-        "Skill 3:   <3>",
-        "Quit:      <backspace>"};
-    mvwprintw(win, 0, 1,"Control key");
-    for(int i = 0; i < 7; i++)
-        mvwprintw(win, i + +2, 1, "%s", guide[i].c_str());
+    int line = 0;
+    mvwprintw(win, line++, 1, "Control keys");
+    line++;
+    mvwprintw(win, line++, 1, "Movement:  <arrow keys>");
+    mvwprintw(win, line++, 1, "Inventory: <i>");
+    mvwprintw(win, line++, 1, "Skill 1:   <1>");
+    mvwprintw(win, line++, 1, "Skill 2:   <2>");
+    mvwprintw(win, line++, 1, "Skill 3:   <3>");
+    mvwprintw(win, line++, 1, "Quit:      <backspace>");
     wrefresh(win);
 }
 bool Game::warning(){

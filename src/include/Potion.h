@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Item.h"
+#include "Hero.h"
 
 class Potion: public Item{
 private:
@@ -10,6 +11,6 @@ private:
 public:
     Potion(const std::string& name, char character, int x, int y,
              int hp, int mana, int exp);
-    virtual bool use(Hero* hero) override;
+    virtual bool use(Hero* hero, std::string& outMsg) override;
     virtual std::string toData() const override;
 };
