@@ -20,59 +20,39 @@ void Game::displayGame(){
     keypad(win, true);
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "Game screen");
-    // init log window
-    LogMsg * log = new LogMsg( xSize, 6, startX, ySize + 1, 3);
-    // init side windows
+    LogMsg * log = new LogMsg( xSize, 8, startX, ySize + 1, 6);
     WINDOW *heroStats = newwin(11, 20, startY, xSize + 1);
-    WINDOW *enemyStats = newwin(10, 20, startY, xSize + 1 + 20);
     WINDOW *skill = newwin(8, 20, startY + 11, xSize + 1);
     WINDOW *control = newwin(10, 25, startY + 19, xSize + 1);
     int move;
     bool running = true;
-    try{
-        log->displayMsg("Welcome to the game!");
-        m_Map->getHero()->addLogWin(log);
-        m_Map->display(win);
-        m_Map->getHero()->displaySkill(skill);
-        m_Map->getHero()->displayStats(heroStats);
-        this->displayControl(control);
-        while (running)
-        {
-            move = m_Map->getKey(win, control);
-            switch (move)
-            {
-            case KEY_BACKSPACE:
-                if(this->warning())
-                    running = false;
-                break;
-                // save game
-                // display wiki
-            default:
-                break;
-            }
-            box(win, 0, 0);
-            mvwprintw(win, 0, 1, "Game screen");
-            m_Map->display(win);
-            m_Map->getHero()->displayStats(heroStats);
-            this->displayControl(control);
-        };
+    m_Hero->addLogWin(log);
+    m_Hero->addStatsWin(heroStats);
 
-    }catch(const std::string& e){
-        clear();
-		mvprintw(0, 0, "%s",e.c_str());
-		refresh();
-		getch();
-        endwin();
-		std::cout << "Error: " << e << std::endl;
-    }catch(const char * e){
-        clear();
-		mvprintw(0, 0, "%s", e);
-		refresh();
-		getch();
-        endwin();
-		std::cout << "Error: " << e << std::endl;
-    }
-    
+    log->displayMsg("Welcome to the game!");
+    m_Map->display(win);
+    m_Hero->displaySkill(skill);
+    m_Hero->displayStats();
+    this->displayControl(control);
+    while (running)
+    {
+        move = m_Map->getKey(win, control);
+        switch (move)
+        {
+        case KEY_BACKSPACE:
+            if(this->warning())
+                running = false;
+            break;
+            // save game
+            // display wiki
+        default:
+            break;
+        }
+        box(win, 0, 0);
+        mvwprintw(win, 0, 1, "Game screen");
+        m_Map->display(win);
+        this->displayControl(control);
+    };
     clear();
     refresh();
 }
@@ -183,10 +163,24 @@ void Game::createHero(){
     int ySize = 13, xSize = 25;
     WINDOW *win = newwin(ySize, xSize, yMax / 2 - 5, xMax / 2 + 10);
     
-    std::string arrHero[3] = {"Warrior", "Wizard", "Archer"};
-    Stats wizardStat {100, 100, 3, 10, 3, 5};
-    Stats warriorStat{100, 100, 7, 0, 11, 1};
-    Stats archerStat {100, 100, 10, 5, 3, 2};
+    std::string nameHero[3] = {"Warrior", "Wizard", "Archer"};
+    // stats for hero
+    std::vector<Stats> stats;
+    std::vector<AttackSkill*> attackSkill;
+    std::vector<HealSkill*> healSkill;
+
+    stats.push_back(Stats{100, 100, 3, 10, 3, 5}),
+    stats.push_back(Stats{100, 100, 7, 0, 11, 1}),
+    stats.push_back(Stats{100, 100, 10, 5, 3, 2}),
+    
+    // add skills for hero
+    attackSkill.push_back(new AttackSkill {"Primary attack", 1, 5, 10, true}),
+    attackSkill.push_back(new AttackSkill {"Primary attack", 2, 5, 20, false}),
+    attackSkill.push_back(new AttackSkill {"Primary attack", 3, 5, 10, false}),
+
+    healSkill.push_back(new HealSkill{"Heal", 2, 5, 10});
+    healSkill.push_back(new HealSkill{"Heal", 2, 5, 10});
+    healSkill.push_back(new HealSkill{"Heal", 2, 5, 10});
 
     int type = 0;
     bool create = true, selected = true;
@@ -199,39 +193,16 @@ void Game::createHero(){
         // hero type selection
         if (selected)
             wattron(win, A_STANDOUT);
-        mvwprintw(win, line++, 1, "Hero type: < %s >", arrHero[type].c_str());
+        mvwprintw(win, line++, 1, "Hero type: < %s >", nameHero[type].c_str());
         wattroff(win, A_STANDOUT);
         line++;
-        // display stats by hero
-        switch (type)
-        {
-        case 0:
-            mvwprintw(win, line++, 1, "HP: %d", warriorStat.getHP());
-            mvwprintw(win, line++, 1, "Mana: %d", warriorStat.getMana());
-            mvwprintw(win, line++, 1, "Strength: %d", warriorStat.getStrength());
-            mvwprintw(win, line++, 1, "Magic: %d", warriorStat.getMagic());
-            mvwprintw(win, line++, 1, "Armor: %d", warriorStat.getArmor());
-            mvwprintw(win, line++, 1, "Resistance: %d", warriorStat.getResistance());
-            break;
-        case 1:
-            mvwprintw(win, line++, 1, "HP: %d", wizardStat.getHP());
-            mvwprintw(win, line++, 1, "Mana: %d", wizardStat.getMana());
-            mvwprintw(win, line++, 1, "Strength: %d", wizardStat.getStrength());
-            mvwprintw(win, line++, 1, "Magic: %d", wizardStat.getMagic());
-            mvwprintw(win, line++, 1, "Armor: %d", wizardStat.getArmor());
-            mvwprintw(win, line++, 1, "Resistance: %d", wizardStat.getResistance());
-            break;
-        case 2:
-            mvwprintw(win, line++, 1, "HP: %d", archerStat.getHP());
-            mvwprintw(win, line++, 1, "Mana: %d", archerStat.getMana());
-            mvwprintw(win, line++, 1, "Strength: %d", archerStat.getStrength());
-            mvwprintw(win, line++, 1, "Magic: %d", archerStat.getMagic());
-            mvwprintw(win, line++, 1, "Armor: %d", archerStat.getArmor());
-            mvwprintw(win, line++, 1, "Resistance: %d", archerStat.getResistance());
-            break;
-        default:
-            break;
-        }
+        // display stats each hero
+            mvwprintw(win, line++, 1, "HP: %d", stats[type].getHP());
+            mvwprintw(win, line++, 1, "Mana: %d", stats[type].getMana());
+            mvwprintw(win, line++, 1, "Strength: %d", stats[type].getStrength());
+            mvwprintw(win, line++, 1, "Magic: %d", stats[type].getMagic());
+            mvwprintw(win, line++, 1, "Armor: %d", stats[type].getArmor());
+            mvwprintw(win, line++, 1, "Resistance: %d", stats[type].getResistance());
         // draw a line
         wmove(win, line++ , 1);
         whline(win, ACS_HLINE, 23);
@@ -265,25 +236,26 @@ void Game::createHero(){
             {
                 try{
                     m_Map = new Map {"map1.txt"};
-                    if(type == 0){
-                        m_Map->loadEntity("Warrior", warriorStat);
-                    }else if(type == 1){
-                        m_Map->loadEntity("Wizard", wizardStat);
-                    }else{
-                        m_Map->loadEntity("Archer", archerStat);
-                    }
-
+                    m_Hero = new Hero{nameHero[type], 0, 0, stats[type]};
+                    m_Hero->addSkill(attackSkill[type]);
+                    m_Hero->addSkill(healSkill[type]);
+                    m_Map->loadEntity(m_Hero);
+                    displayGame();
+                    // back to menu
+                    create = false;
                 }catch(const std::string& e){
                     clear();
                     mvprintw(0, 0, "%s",e.c_str());
                     refresh();
                     getch();
                     endwin();
-                    std::cout << "Error: " << e << std::endl;
+                }catch(const char* e){
+                    clear();
+                    mvprintw(0, 0, "Error: %s",e);
+                    refresh();
+                    getch();
+                    endwin();
                 }
-                displayGame();
-                // back to menu
-                create = false;
             }
         default:
             break;

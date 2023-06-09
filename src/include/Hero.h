@@ -8,7 +8,7 @@
 #include "LogMsg.h"
 #include <array>
 #include <algorithm>
-
+#include <iostream>
 class Equipment;
 
 class Hero: public Character{
@@ -26,28 +26,33 @@ private:
     std::array<Equipment*, equipmentMax> m_Equipments;
 
     LogMsg * m_Log = NULL;
+    WINDOW* m_StatsWin;
 
 public:
     Hero(const std::string& name, int x, int y, const Stats &stats);
     ~Hero();
-
+    void setPosition(int x, int y);
+    LogMsg* getLog() const;
+    WINDOW* getStatsWin()const;
     void gainExp(int amount);
-
-    void openInventory(WINDOW * win, WINDOW *control);
-    void displayBackPack(WINDOW * win, WINDOW* detail, int selected, bool backpack);
-    void displayEquipment(WINDOW * win, WINDOW* detail, int selected, bool backpack);
     char move(WINDOW* win, int x, int y);
-
-    bool addSkill(Skill * skill);
+    void addSkill(Skill * skill);
     bool addItem(Item* item);
+    void removeItem(size_t index);
     bool useSkill(size_t index, Character* monster);
+    void decreaseCooldown();
     bool useItem(size_t index);
     bool unequip(size_t index);
     bool equip(Equipment* item, int type);
+
+    void addStatsWin(WINDOW* win);
     void addLogWin(LogMsg* log);
-    // getters
+    void openInventory(WINDOW * win, WINDOW *control);
+    void displayBackPack(WINDOW * win, WINDOW* detail, int selected, bool backpack)const;
+    void displayEquipment(WINDOW * win, WINDOW* detail, int selected, bool backpack)const;
+    void displayDetail(WINDOW* win, const std::string& description)const;
     void displayHero(WINDOW* win) const;
-    void displayStats(WINDOW* win) const;
+    void displayStats() const;
     void displaySkill(WINDOW* win) const;
     std::string toData() const;
     

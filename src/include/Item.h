@@ -19,8 +19,10 @@ public:
     // getters 
     Position getPos()const;
     const std::string& getName()const;
+    char getCharacter()const;
     
     virtual bool use(Hero* hero, std::string& outMsg) = 0;
+    virtual std::string printDescription()const = 0;
     virtual void displayItem(WINDOW * win) const;
     virtual std::string toData() const;
     bool operator == (const Item& other) const;

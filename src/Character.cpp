@@ -53,3 +53,4 @@ void Character::increaseMana(int amount){
 }
 int Character::getCurrHP() const{return m_CurrHP;}
 int Character::getCurrMana() const{return m_CurrMana;}
+const std::string& Character:: getName()const{return m_Name;}

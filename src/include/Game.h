@@ -12,12 +12,15 @@
 #include "Potion.h"
 #include "Monster.h"
 #include "LogMsg.h"
-
+#include "Skill.h"
+#include "AttackSkill.h"
+#include "HealSkill.h"
 
 class Game{
 private:
     WINDOW * m_Win;
     Map * m_Map = NULL;
+    Hero * m_Hero = NULL;
 public:
     Game();
     ~Game();

@@ -15,14 +15,24 @@ Map::Map(const std::string& mapFile){
     }
     inFile.close();
 }
-void Map::loadEntity(const std::string &name,const Stats& stats){
-    int hero = 0;
+Map::~Map(){
+    delete m_Hero;
+    for(size_t i = 0; i < m_Monsters.size(); i++)
+        delete m_Monsters.at(i);
+    for(size_t i = 0; i < m_Gates.size(); i++)
+        delete m_Gates.at(i);
+    for(size_t i = 0; i < m_Items.size(); i++)
+        delete m_Items.at(i);
+}
+void Map::loadEntity(Hero *hero){
+    int heroCnt = 0;
     for(size_t i = 0; i < m_Map.size(); i++){
         for(size_t j = 0; j < m_Map.at(i).size(); j++){
             char tile = m_Map.at(i).at(j);
             if(tile == '@'){
-                hero++;
-                m_Hero = new Hero{name, (int)(j + m_Margin), (int)(i + m_Margin), stats};
+                heroCnt++;
+                m_Hero = hero;
+                m_Hero->setPosition(i + m_Margin,j + m_Margin);
                 m_Map.at(i).at(j) = '.';
             }else if(tile == '-' || tile == '+'){
                 m_Gates.push_back(new Gate{tile, (int)(j + m_Margin), (int)(i + m_Margin), false});
@@ -38,31 +48,35 @@ void Map::loadEntity(const std::string &name,const Stats& stats){
             }
         }
     }
-    if(hero == 0){
+    if(heroCnt == 0){
         throw "Hero not found";
-    }else if(hero > 2){
+    }else if(heroCnt > 2){
         throw "More than 1 hero ono map";
     }
 }
 void Map::addMonster(char tile, int x, int y){
     static Stats monsterStat {20, 10, 10, 5, 3, 2};
+    AttackSkill * spiderSkill = new AttackSkill("Primary attack", 1, 5, 10, true);
+    HealSkill * slimeSkill = new HealSkill("Heal", 1, 5, 10);
     switch (tile)
     {
     case 'S':
-        m_Monsters.push_back(new Monster{"Slime", x, y, monsterStat, nullptr, 5, tile});
+        m_Monsters.push_back(new Monster{"Slime", x, y, monsterStat, slimeSkill, 5, tile});
         break;
     case 'X':
-        m_Monsters.push_back(new Monster{"Spider", x, y, monsterStat, nullptr, 6, tile});
+        m_Monsters.push_back(new Monster{"Spider", x, y, monsterStat, spiderSkill, 6, tile});
     default:
         break;
     }
+    spiderSkill = NULL;
+    slimeSkill = NULL;
 }
 void Map::addItem(char tile, int x, int y){
-    static Stats helmetStat {100, 100, 10, 5, 3, 2};
-    static Stats plateStat  {100, 100, 10, 5, 3, 2};
-    static Stats axeStat    {100, 100, 10, 5, 3, 2};
-    static Stats bootStat   {100, 100, 10, 5, 3, 2};
-    static Stats ringStat   {100, 100, 10, 5, 3, 2};
+    static Stats helmetStat {50, 0, 0, 0, 10, 12};
+    static Stats plateStat  {200, 0, 0, 0, 20, 5};
+    static Stats axeStat    {0, 0, 20, 0, 0, 0};
+    static Stats bootStat   {0, 0, 10, 5, 0, 0};
+    static Stats ringStat   {0, 100, 0, 0, 10, 8};
     switch (tile)
     {
         case '^':
@@ -130,9 +144,12 @@ int Map::getKey(WINDOW* win, WINDOW* control){
     }else if(m_CharMonster.find(target) != m_CharMonster.end()){
         size_t index = this->findMonster(m_Hero->getPos());
        if(index != m_Monsters.size()){
-
-       }
             // enter combat
+            if(!this->combat(win, m_Hero, m_Monsters.at(index))){
+                // hero loses
+                move = KEY_BACKSPACE;
+            }
+       }
     }
     return move;
 }
@@ -149,6 +166,60 @@ size_t Map::findMonster(Position pos)const{
             return i;
     }
     return m_Monsters.size();
+}
+bool Map::combat(WINDOW* win, Hero* hero, Monster* monster){
+    LogMsg * log = hero->getLog();
+    std::string outMsg;
+    bool playerWin = true;
+    WINDOW *enemyStats = newwin(10, 20, 1, 83);
+    size_t turn = 0;
+    while(++turn){
+        monster->displayStats(enemyStats);
+        int key = wgetch(win);
+        switch (key)
+        {
+        case 'q':
+            hero->useSkill(0, monster);
+            break;
+        case 'w':
+            hero->useSkill(1, monster);
+            break;
+        case 'e':
+            hero->useSkill(2, monster);
+            break;
+        default:
+            continue;
+            break;
+        }
+        if(monster->getCurrHP() <= 0){
+            log->displayMsg("Hero killed " + monster->getName());
+            hero->gainExp(monster->getExp());
+            size_t found = this->findMonster(monster->getPos());
+            if(found == m_Monsters.size())
+                throw "Cannot find dead monster";
+            m_Monsters.erase(m_Monsters.begin() + found);
+            break;
+        }
+        if(monster->useSkill(hero, outMsg)){
+            log->displayMsg(monster->getName() + " used skill");
+            m_Hero->displayStats();
+        }
+        if(hero->getCurrHP() <= 0){
+            log->displayMsg("Hero was killed by " + monster->getName());
+            playerWin = false;
+            break;
+        }
+        if(turn > 50){
+            throw "Max turn exceeded";
+            break;
+        }
+        hero->decreaseCooldown();
+        monster->decreaseCooldown();
+    }
+    werase(enemyStats);
+    wrefresh(enemyStats);
+    delwin(enemyStats);
+    return playerWin;
 }
 Hero* Map::getHero()const { return m_Hero;}
 void Map::display(WINDOW* win){

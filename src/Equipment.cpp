@@ -1,9 +1,10 @@
 #include "include/Equipment.h"
 
-Equipment::Equipment(const std::string& name, char character, int x, int y, 
-                const Stats& buff)
-: Item{name, character,x, y}, m_Buff{buff}{}
-bool Equipment::use(Hero* hero, std::string& outMsg){
+Equipment::Equipment(const std::string &name, char character, int x, int y,
+                     const Stats &buff)
+    : Item{name, character, x, y}, m_Buff{buff} {}
+bool Equipment::use(Hero *hero, std::string &outMsg)
+{
     int type;
     switch (m_Character)
     {
@@ -26,16 +27,30 @@ bool Equipment::use(Hero* hero, std::string& outMsg){
         throw "Unknown equipment type";
         break;
     }
-    if(hero->equip(this, type)){
+    if (hero->equip(this, type))
+    {
         outMsg = "Equipped " + m_Name;
         return true;
     }
     outMsg = "Cannot equip " + m_Name;
     return false;
 }
-std::string Equipment::toData()const{
+std::string Equipment::printDescription() const
+{
     std::stringstream res;
-    res << Item::toData() << m_Buff.toData() ;
+    res << "+ " << m_Buff.getHP() << " max HP\n"
+        << "+ " << m_Buff.getMana() << " max mana\n"
+        << "+ " << m_Buff.getStrength() << " strength\n"
+        << "+ " << m_Buff.getMagic() << " magic\n"
+        << "+ " << m_Buff.getArmor() << " armor\n"
+        << "+ " << m_Buff.getResistance() << " resistance\n";
     return res.str();
 }
-const Stats& Equipment::getBuff() const{return m_Buff;}
+
+std::string Equipment::toData() const
+{
+    std::stringstream res;
+    res << Item::toData() << m_Buff.toData();
+    return res.str();
+}
+const Stats &Equipment::getBuff() const { return m_Buff; }

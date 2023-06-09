@@ -32,5 +32,6 @@ public:
     Position getPos() const;
     int getCurrHP() const;
     int getCurrMana() const;
+    const std::string& getName()const;
     std::string toData() const;
 };

@@ -6,7 +6,7 @@ Item::Item(const std::string& name, char character, int x, int y)
 
 Position Item::getPos()const{return m_Pos;}
 const std::string& Item::getName()const{return m_Name;}
-
+char Item:: getCharacter()const{return m_Character;}
 void Item::displayItem(WINDOW* win)const {
     mvwaddch(win, m_Pos.m_Y, m_Pos.m_X, m_Character);
 }

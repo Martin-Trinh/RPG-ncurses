@@ -3,9 +3,11 @@
 Monster::Monster(const std::string& name, int x, int y, const Stats &stats, 
                 Skill * skill,int expWorth, char character)
     :Character{name, x, y, stats}, m_Skill{skill}, m_ExpWorth{expWorth}, m_Character{character}{}
-
-bool Monster::useSkill(Character* hero){
-    if(m_Skill->getCooldown() == 0){
+Monster::~Monster(){
+    delete m_Skill;
+}
+bool Monster::useSkill(Character* hero, std::string& outMsg){
+    if(m_Skill->getCurrCooldown() != 0){
         // skill in cooldown
         return false;
     }
@@ -13,10 +15,13 @@ bool Monster::useSkill(Character* hero){
         // not enough mana
         return false;
     }
+    outMsg = "Monster used " + m_Skill->getName() + " spell";
     m_Skill->use(this, hero);
     return true;
 }
-
+void Monster::decreaseCooldown(){
+    m_Skill->decreaseCooldown();
+}
 int Monster::getExp() const{return m_ExpWorth;}
 
 void Monster::displayMonster(WINDOW* win) const{

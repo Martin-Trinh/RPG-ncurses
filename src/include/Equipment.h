@@ -9,6 +9,7 @@ public:
     Equipment(const std::string& name,char character, int x, int y, 
                 const Stats& buff);
     virtual bool use(Hero* hero, std::string& outMsg) override;
+    virtual std::string printDescription() const override;
     virtual std::string toData() const override;
     // getters
     const Stats& getBuff() const;

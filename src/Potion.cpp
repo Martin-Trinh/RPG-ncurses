@@ -21,7 +21,14 @@ bool Potion::use(Hero* hero, std::string& outMsg){
     outMsg = res.str();
     return true;
 }
-
+std::string Potion::printDescription() const
+{
+    std::stringstream res;
+    res << "+ " << m_HP << " max HP\n"
+        << "+ " << m_Mana << " max mana\n"
+        << "+ " << m_Exp << " Exp\n";
+    return res.str();
+}
 std::string Potion::toData()const{
     std::stringstream res;
     res << Item::toData() 

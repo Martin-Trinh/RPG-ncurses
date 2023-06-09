@@ -9,4 +9,5 @@ private:
 public:
     AttackSkill(const std::string &name, int cooldown, int cost, int damage, bool magical);
     virtual void use(Character* self, Character* enemy) override;
+    virtual std::string toData()const override; 
 };

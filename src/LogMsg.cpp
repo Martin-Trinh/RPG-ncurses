@@ -13,18 +13,14 @@ void LogMsg::displayMsg(const std::string& newMsg){
     box(m_Win, 0, 0);
     mvwprintw(m_Win, 0, 1, "Game messages");
     int width = getmaxx(m_Win);
-    if(m_Messages.size() == m_MaxMsg){
-        std::swap(m_Messages.at(1), m_Messages.at(2));
-        std::swap(m_Messages.at(0), m_Messages.at(2));
-        m_Messages.at(2) = newMsg;
-    }else{
-        m_Messages.push_back(newMsg);
-    }
+    if(m_Messages.size() == m_MaxMsg)
+        m_Messages.erase(m_Messages.begin());
+    m_Messages.push_back(newMsg);
     int row = 1;
     for(const auto& msg : m_Messages){
         int col = 1; 
         for(char i: msg){
-            if(col >= width){
+            if(col >= width || i == '\n'){
                 col = 1;
                 row++;
             }

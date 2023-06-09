@@ -12,9 +12,10 @@ private:
 public:
     Monster(const std::string& name, int x, int y, const Stats &stats, 
             Skill * skill, int expWorth, char character);
-
+    ~Monster();
     void findHero();
-    bool useSkill(Character* hero);
+    void decreaseCooldown();
+    bool useSkill(Character* hero, std::string& outMsg);
     int getExp()const;
     void displayMonster(WINDOW * win) const;
     std::string toData() const;

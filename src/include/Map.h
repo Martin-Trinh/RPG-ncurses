@@ -16,13 +16,15 @@
 #include "ncurses.h"
 #include "LogMsg.h"
 #include "Gate.h"
+#include "AttackSkill.h"
+#include "HealSkill.h"
 
 class Map{
 private:
     std::vector<std::string> m_Map;
     static const int m_Margin = 2;
 
-    Hero * m_Hero;
+    Hero * m_Hero = NULL;
     std::vector<Item*> m_Items;
     std::vector<Monster*> m_Monsters;
     std::vector<Gate*> m_Gates;
@@ -32,13 +34,15 @@ private:
 
 public:
     Map(const std::string& mapFile);
+    ~Map();
     int save(const std::string& file);
 
-    void loadEntity(const std::string &name,const Stats& stats);
+    void loadEntity(Hero* hero);
     void addMonster(char tile, int x, int y);
     void addItem(char tile, int x, int y);
     size_t findItem(Position pos)const;
     size_t findMonster(Position pos)const;
+    bool combat(WINDOW* win, Hero* hero, Monster* monster);
     int getKey(WINDOW* win, WINDOW* control);
     // getters
     Hero* getHero() const;
