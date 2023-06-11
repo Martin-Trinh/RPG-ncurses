@@ -5,15 +5,6 @@ Hero::Hero(const std::string &name, int x, int y, const Stats &stats)
 {
     m_Equipments.fill(nullptr);
 }
-void Hero::setCurrAttributes(int currHP, int currMana, int exp, int nextLevelExp, int level)
-{
-    m_NextLevelExp = nextLevelExp;
-    m_Level = level;
-    m_Exp = exp;
-    m_CurrHP = currHP;
-    m_CurrMana= currMana;
-}
-
 Hero::~Hero()
 {
     for (size_t i = 0; i < m_Inventory.size(); i++)
@@ -41,6 +32,14 @@ Hero::Hero(const Hero& other): Character(other){
 
 LogMsg* Hero::getLog()const {return m_Log;}
 WINDOW* Hero::getStatsWin()const{return m_StatsWin;}
+void Hero::setCurrAttributes(int currHP, int currMana, int exp, int nextLevelExp, int level)
+{
+    m_NextLevelExp = nextLevelExp;
+    m_Level = level;
+    m_Exp = exp;
+    m_CurrHP = currHP;
+    m_CurrMana= currMana;
+}
 void Hero::addSkill(Skill *skill)
 {
     if (m_Skills.size() == skillMax)
@@ -131,6 +130,10 @@ bool Hero::unequip(size_t index)
     }    
     if(this->addItem(m_Equipments.at(index))){
         m_Stats -= m_Equipments.at(index)->getBuff();
+        if(m_CurrHP > m_Stats.getHP())
+            m_CurrHP = m_Stats.getHP();
+        if(m_CurrMana > m_Stats.getMana())
+            m_CurrMana = m_Stats.getMana();
         m_Log->displayMsg("Unequip " + m_Equipments.at(index)->getName());
         m_Equipments.at(index) = nullptr;
         return true;
@@ -175,7 +178,7 @@ char Hero::move(WINDOW *win, int margin, int x, int y)
     return target;
 }
 void Hero::save(const std::string& filename)const{
-    std::ofstream outFile {"./map/" + filename + ".hero"};
+    std::ofstream outFile {"./examples/hero/" + filename + ".hero"};
     if(!outFile)
         throw "Cannot save to file" + filename;
 

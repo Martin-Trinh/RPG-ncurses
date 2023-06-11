@@ -3,7 +3,7 @@
 
 Map::Map(const std::string& mapFile, GameConfig* config)
 :m_GameConfig{config}{
-    std::ifstream inFile {"./map/" + mapFile + ".map"};
+    std::ifstream inFile {"./examples/maps/" + mapFile + ".map"};
     if(!inFile){
         throw "Cannot open file " + mapFile;
     }
@@ -80,7 +80,7 @@ void Map::loadEntity(const std::string& heroName, bool newGame){
 }
 // save map to file
 void Map::save(const std::string& mapFile){
-    std::ofstream outFile {"./map/" + mapFile + ".map"};
+    std::ofstream outFile {"./examples/maps" + mapFile + ".map"};
     if(!outFile.is_open())
         throw "Cannot open file " + mapFile;
 
@@ -101,7 +101,7 @@ void Map::save(const std::string& mapFile){
     outFile.close();
 }
 void Map::loadHeroFromFile(const std::string& filename,GameConfig* config){
-    std::ifstream inFile {"./map/" + filename + ".hero"};
+    std::ifstream inFile {"./examples/hero/" + filename + ".hero"};
     if(!inFile)
         throw "Cannot open file " + filename;
     size_t invenSize = 0;
@@ -236,8 +236,6 @@ bool Map::combat(WINDOW* win, Hero* hero, Monster* monster){
     std::string outMsg;
     size_t turn = 0;
     while(++turn){
-        hero->decreaseCooldown();
-        monster->decreaseCooldown();
         monster->displaySkills(enemySkill);
         hero->displaySkill(heroSkill);
         monster->displayStats(enemyStats);
@@ -257,6 +255,7 @@ bool Map::combat(WINDOW* win, Hero* hero, Monster* monster){
             continue;
             break;
         }
+        hero->decreaseCooldown();
         if(monster->getCurrHP() <= 0){
             log->displayMsg("Hero killed " + monster->getName());
             hero->gainExp(monster->getExp());
@@ -273,6 +272,7 @@ bool Map::combat(WINDOW* win, Hero* hero, Monster* monster){
             log->displayMsg(outMsg);
             m_Hero->displayStats();
         }
+        monster->decreaseCooldown();
         if(hero->getCurrHP() <= 0){
             log->displayMsg("Hero was killed by " + monster->getName());
             playerWin = false;
@@ -298,12 +298,12 @@ bool Map::combat(WINDOW* win, Hero* hero, Monster* monster){
 void Map::display(WINDOW* win){
     int yMax, xMax;
     getmaxyx(win, yMax, xMax);
-    if((int)m_Map.size() >= yMax)
+    if((int)m_Map.size() + m_Margin >= yMax)
         throw "Invalid map size";
     
     // display map
     for(size_t i = 0; i < m_Map.size(); i++){
-        if((int)m_Map.at(i).size() >= xMax)
+        if((int)m_Map.at(i).size() + m_Margin >= xMax)
             throw "Invalid map size";
         mvwprintw(win, i + m_Margin, m_Margin, "%s", m_Map.at(i).c_str());
     }

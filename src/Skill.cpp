@@ -16,12 +16,6 @@ void Skill::decreaseCooldown(){
     if(m_CurrCooldown < 0)
         throw "Cooldown below 0";
 }
-
-std::string Skill::toData() const{
-    std::stringstream res;
-    res << m_Name << ',' << m_Cooldown << ',' << m_Cost;
-    return res.str();
-}
 std::string Skill::printDescription() const{
     std::stringstream res;
     res << "Name: " << m_Name << "\n" << "Cooldown: " << m_Cooldown << " | " << "Cost: " << m_Cost;

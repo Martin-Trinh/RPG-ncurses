@@ -6,16 +6,18 @@ Game::Game(){
     cbreak();
     curs_set(0);
     try{
+        // check terminal size
+        if(LINES < m_SrcHeight || COLS < m_SrcWidth)
+            throw std::string{"Please resize your terminal to at least 120x35"};
         // load from config file
         m_GameConfig = new GameConfig(m_ConfigFile);
     }catch(const std::string& e){
-        clear();
-        mvprintw(0, 0, "%s",e.c_str());
         refresh();
-        getch();
+        this->msgPopUp(e);
     }
 }
 Game::~Game(){
+    delete m_Map;
     delete m_GameConfig;
     endwin();
 }
@@ -81,7 +83,7 @@ void Game::displayGame(){
     delwin(heroStats);
     delwin(control);
 }
-void Game::loadGame(){
+bool Game::loadGame(){
     vecStr description = {"Load game", "Filename", "<Press enter to load>"};
     std::string filename;
     this->getInput(description, filename);
@@ -90,16 +92,11 @@ void Game::loadGame(){
         m_Map->loadHeroFromFile(filename, m_GameConfig);
         m_Map->loadEntity(filename, false);
     }catch(const std::string& e){
-        clear();
-        mvprintw(1, 1, "%s", e.c_str());
         refresh();
-        getch();
-    }catch(const char* e){
-        clear();
-        mvprintw(1, 1, "%s", e);
-        refresh();
-        getch();
+        this->msgPopUp(e);
+        return false;
     }
+    return true;
 }
 void Game::saveGame(){
     vecStr description = {"Save game", "Filename", "<Press enter to save>"};
@@ -202,6 +199,7 @@ bool Game::warning()const{
     }
 }
 void Game::displayMenu(){
+    
     int yMax, xMax;
     getmaxyx(stdscr, yMax, xMax);
     int ySize = 10, xSize = 20;
@@ -238,8 +236,10 @@ void Game::displayMenu(){
             if (Options.at(selected) == "New Game")
                 this->createHero();
             if (Options.at(selected) == "Load Game"){
-                this->loadGame();
-                this->displayGame();
+                if(this->loadGame())
+                    this->displayGame();
+                else
+                    break;
             }
             if (Options.at(selected) == "Exit")
                 m_Exit = true;
@@ -318,17 +318,9 @@ void Game::createHero(){
                     // back to menu
                     create = false;
                 }catch(const std::string& e){
-                    clear();
-                    mvprintw(0, 0, "%s",e.c_str());
                     refresh();
-                    getch();
-                    endwin();
-                }catch(const char* e){
-                    clear();
-                    mvprintw(0, 0, "Error: %s",e);
-                    refresh();
-                    getch();
-                    endwin();
+                    this->msgPopUp(e);
+                    create = false;
                 }
             }
         default:
@@ -340,14 +332,15 @@ void Game::createHero(){
     delwin(win);
 }
 void Game::msgPopUp(const std::string& msg){
+    std::string control = "<Press any key to exit>";
     m_Exit = true;
     int yMax, xMax;
     getmaxyx(stdscr, yMax, xMax);
-    int ySize = 6, xSize = 30;
+    int ySize = 6, xSize = (int)msg.size() + 20;
     WINDOW *win = newwin(ySize, xSize, yMax / 2 - ySize / 2, xMax / 2 - xSize / 2);
     box(win, 0, 0);
     mvwprintw(win, 2, (xSize - msg.size()) / 2, "%s", msg.c_str());
-    mvwprintw(win, 4, 5, "Press any key to exit");
+    mvwprintw(win, 4, (xSize - control.size()) / 2, "%s", control.c_str());
     wrefresh(win);
     getch();
     wclear(win);

@@ -1,16 +1,16 @@
 LOGIN = trinhdin
 CXX = g++
-BASIC_FLAGS = -std=c++17 -O2 -g -fsanitize=address -Wall -pedantic
+BASIC_FLAGS = -std=c++17 -O2 -g -fsanitize=address -Wall -pedantic -Wextra
 FLAGS = -lncurses
 
-ZIP = Makefile Doxyfile DOCUMENTATION.md zadani.txt prohlaseni.txt \
+ZIP = Makefile Doxyfile zadani.txt prohlaseni.txt \
   .gitignore $(wildcard examples/*) $(wildcard src/*)
 
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(patsubst src/%.cpp, build/%.o, ${SOURCES})
-DEP_FILE = dependencies.dep
+DEPS = $(patsubst src/%.cpp, build/%.dep, ${SOURCES})
 
-.PHONY: all compile run valgrind doc clean count zip
+.PHONY: all compile run valgrind doc clean zip
 
 all: compile doc
 
@@ -20,12 +20,9 @@ ${LOGIN}: ${OBJECTS}
 	@mkdir -p build/
 	${CXX} ${BASIC_FLAGS} ${FLAGS} $^ -o $@
 
-build/%.o: src/%.cpp
+build/%.o: src/%.cpp 
 	@mkdir -p build/
 	${CXX} ${BASIC_FLAGS} ${FLAGS} -c $< -o $@
-	@${CXX} -MM -MT "$@" $< > $(patsubst build/%.o, build/%.dep, $@)
-
--include ${DEP_FILE}
 
 run: compile
 	./${LOGIN}
@@ -33,13 +30,8 @@ run: compile
 valgrind: compile
 	valgrind ./${LOGIN}
 
-doc: doc/index.html
-
-doc/index.html: Doxyfile DOCUMENTATION.md $(wildcard src/*)
+doc:
 	doxygen Doxyfile
-
-count:
-	wc -l src/* src/include/* 2>/dev/null
 
 clean:
 	rm -rf build doc
@@ -54,3 +46,10 @@ ${LOGIN}.zip: ${ZIP}
 	cp --parents -r $^ tmp/${LOGIN}/
 	cd tmp/ && zip -r ../$@ ${LOGIN}/
 	rm -rf tmp/
+
+build/%.dep: src/%.cpp src/*
+	@mkdir -p build/
+	${CXX} -MM -MT $(patsubst src/%.cpp, build/%.o, $<) $< > $@
+
+include ${DEPS}
+

@@ -1,35 +1,45 @@
 #include "include/GameConfig.h"
 
 GameConfig::GameConfig(const std::string& file){
-    m_File.open("./config/" + file);
-    if(!m_File.is_open())
+    m_File.open("./examples/" + file);
+    try{
+        if(!m_File.is_open())
         throw "Cannot open file " + file;
 
-    std::string line;
-    while(std::getline(m_File, line)){
-        if(line.empty() || line[0] == '#') 
-            continue;
-        if(line == "<Hero>"){
-            readHero();
+        std::string line;
+        while(std::getline(m_File, line)){
+            if(line.empty() || line[0] == '#') 
+                continue;
+            if(line == "<Hero>")
+                readHero();
+            else if(line == "<Monster>")
+                readMonster();
+            else if(line == "<Equipment>")
+                readEquipment();
+            else if(line == "<Potion>")
+                readPotion();
+            else if(line == "<AttackSkill>")
+                readAttackSkill();
+            else if(line == "<RegenSkill>")
+                readRegenSkill();
+            else
+                throw "Unknown class " + line;
         }
-        else if(line == "<Monster>"){
-            readMonster();
-        }
-        else if(line == "<Equipment>"){
-            readEquipment();
-        }
-        else if(line == "<Potion>"){
-            readPotion();
-        }
-        else if(line == "<AttackSkill>"){
-            readAttackSkill();
-        }
-        else if(line == "<RegenSkill>"){
-            readRegenSkill();
-        }
+        if(!m_File.eof() || m_File.bad())
+            throw "Error reading file " + file;
+    }catch(const std::string& e){
+        for(auto& hero : m_Heroes)
+            delete hero.second;
+        for(auto& monster : m_Monsters)
+            delete monster.second;
+        for(auto& equipment : m_Equipments)
+            delete equipment.second;
+        for(auto& potion : m_Potions)
+            delete potion.second;
+        for(auto& skill : m_Skills)
+            delete skill.second;    
+        throw e;
     }
-    if(!m_File.eof() || m_File.bad())
-        throw "Error reading file " + file;
     m_File.close();
 }
 GameConfig::~GameConfig(){
@@ -53,7 +63,7 @@ void GameConfig::readStats(std::istringstream& iss, Stats& stats){
 void GameConfig::readHero(){
     std::vector<std::string> skills;
     std::string name, line;
-    Stats stats {0, 0, 0, 0, 0, 0};
+    Stats stats;
     while(std::getline(m_File, line) && line != "</Hero>"){
         if(line[0] == '#' || line.empty())
             continue;
@@ -82,7 +92,7 @@ void GameConfig::readMonster(){
     std::string name, skillName, line;
     char character;
     int expWorth;
-    Stats stats {0, 0, 0, 0, 0, 0}; 
+    Stats stats; 
     while(std::getline(m_File, line) && line != "</Monster>"){
         if(line[0] == '#' || line.empty())
             continue;
@@ -112,7 +122,7 @@ void GameConfig::readMonster(){
 void GameConfig::readEquipment(){
     std::string name, line;
     char character;
-    Stats stats {0, 0, 0, 0, 0, 0};
+    Stats stats;
     while(std::getline(m_File, line) && line != "</Equipment>" ){
         if(line[0] == '#' || line.empty())
             continue;

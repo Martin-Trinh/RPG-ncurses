@@ -1,3 +1,46 @@
+== Zadání (Grafické RPG engine)
+
+Vaším úkolem je implementovat engine pro grafické RPG, nesnažte se proto implementovat v kódu jednotlivé části příběhu. Ten by měl být definovaný v konfiguračních souborech a změnit "výpravu statečných trpaslíků" na "průzkum vesmírných včel" by měl být snadný. Samotná hra může být jak tahová, tak v reálném čase.
+
+Váš engine musí splňovat následující funkcionality:
+
+- Umožněte vytvořit herní postavu, kde si uživatel může navolit alespoň 3 různý druhy atributů (př. síla, obratnost, inteligence, …), vybrat schopnost/i nebo povolání (př. válečník, lučištník, mág, …).
+
+- Každá schopnost (povolání) může mít více efektů, které mohou být aktivní (uživatel je musí použít) nebo pasivní (jsou aktivovány automaticky).
+
+- Interakce se světem probíhá pomocí 2D reprezentace mapy a pohybu.
+
+- Implementujte jednoduchý soubojový systém a inventář
+
+- Hra musí být konfigurovatelná ze souboru:
+    1. definice atributů (př. název, …) a schopností (př. název, cena, efekty, …)
+    2. definice světa (př. mapa, předměty, příšery, dialogy, cíl, …)
+
+- Hra musí umožnit uložit a následně načíst rozehranou hru.
+
+Jak může vypadat mapa? Například # označuje zeď, písmeno T truhlu s pokladem, X nepřítele a > pozici a směr otočení hráče.
+
+###################
+# T   #      #    #
+#           ###   #
+#     ##   #      #
+#     #       # > #
+###################
+
+Kde lze využít polymorfismus? (doporučené)
+
+- soubojové entity: postava, příšera, stroj (př. past, bomba, …)
+
+- efekty povolání: válečník (útočí dvakrát za kolo), lučištník (může střílet na větší vzdálenost), mág (nižší síla, ale každé kolo automaticky zraňuje nepřátele v dosahu), …
+
+- efekty akcí: souboje, události (pád ze stromu, …), přechod na jinou mapu, …
+
+- inventář: postava (ruce, pouze 2 věci + brnění), batoh (nosnost), toulec (pouze šípy), kapsy (pouze malé věci), …
+
+uživatelské rozhraní: konzole, ncurses, SDL, OpenGL (různé varianty), …
+
+== Specifikace
+
 # Popis hry
 Hra bude klasická RPG hra v konzoli. Ve hře bude 1 hrdina, která postupně porazí všechny monstry vyskytující se v mapě. V mapě budou rozvrženy monstry tak, aby hrdina po cestě potkávala od nejméně až po nejvýše silný monstrum. Na mapě se vyskytuje také jednotlivé předměty, které může hrdině pomoc při souboji. Poražením všech monstrů hrdina zvítězí. Prohrává tehdy, když jeho HP klesne na 0.
 
@@ -45,4 +88,6 @@ Nabídky obsahuje např. :
 # Polymorfismus
 Polymorfismus je použit u abstraktní třídy `Item`, kde každá jeho podtřída (`Potion` a `Equipment`) má jiné chování při použití metody `use()`. Potion umožňuje hráč zvýšit svůj výkon. Equipment může hráč vzít na sobě, a tak mít dlouhodobě zvýšené vlastnosti.
 Dále je polymorfismus využíván ve třídě `Skill`, kde jednotlivé specifické schopnosti (`AttackSkill`, `RegenSkill`) způsobí odlišné efekty při použití.
+
+
 

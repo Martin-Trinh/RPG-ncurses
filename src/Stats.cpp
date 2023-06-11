@@ -37,7 +37,3 @@ Stats &Stats::operator-=(const Stats &rhs)
   m_Resistance -= rhs.m_Resistance;
   return *this;
 }
-
-void Stats::loadStats(std::istringstream& iss){
-    iss >> m_HP >> m_Mana >> m_Strength >> m_Magic >> m_Armor >> m_Resistance;
-}

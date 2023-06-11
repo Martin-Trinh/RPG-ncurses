@@ -19,8 +19,3 @@ std::string RegenSkill::printDescription()const{
     m_HP ? res << "HP" : res<< "Mana" ;
     return res.str();
 }
-std::string RegenSkill::toData()const{
-    std::stringstream res;
-    res << Skill::toData() << ',' << m_Amount << ',' << m_HP;
-    return res.str();
-}

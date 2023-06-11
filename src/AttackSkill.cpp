@@ -16,8 +16,3 @@ std::string AttackSkill::printDescription()const{
     m_Magical ? res << "Magical" : res << "Physical";
     return res.str();
 }
-std::string AttackSkill::toData()const{
-    std::stringstream res;
-    res << Skill::toData() << ',' << m_Damage << ',' << m_Magical;
-    return res.str();
-}
