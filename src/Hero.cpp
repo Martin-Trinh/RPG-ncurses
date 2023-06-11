@@ -1,9 +1,17 @@
 #include "include/Hero.h"
 
 Hero::Hero(const std::string &name, int x, int y, const Stats &stats)
-    : Character{name, x, y, stats}
+    : Character{name, '@', x, y, stats}
 {
-    m_Equipments.fill(NULL);
+    m_Equipments.fill(nullptr);
+}
+void Hero::setCurrAttributes(int currHP, int currMana, int exp, int nextLevelExp, int level)
+{
+    m_NextLevelExp = nextLevelExp;
+    m_Level = level;
+    m_Exp = exp;
+    m_CurrHP = currHP;
+    m_CurrMana= currMana;
 }
 
 Hero::~Hero()
@@ -14,12 +22,23 @@ Hero::~Hero()
         delete m_Skills.at(i);
     for (size_t i = 0; i < equipmentMax; i++)
         delete m_Equipments.at(i);
-    delete m_Log;
+    m_Log = nullptr;
+    m_StatsWin = nullptr;
 }
-void Hero::setPosition(int x, int y){
-    m_Pos.m_X = x;
-    m_Pos.m_Y = y;
+Hero::Hero(const Hero& other): Character(other){
+    for(size_t i = 0; i < other.m_Inventory.size(); i++)
+        m_Inventory.push_back(other.m_Inventory.at(i)->clone());
+    for(size_t i = 0; i < other.m_Skills.size(); i++)
+        m_Skills.push_back(other.m_Skills.at(i)->clone());
+    for(size_t i = 0; i < equipmentMax; i++)
+        m_Equipments.at(i) = nullptr;
+    m_Log = other.m_Log;
+    m_StatsWin = other.m_StatsWin;
+    m_Exp = other.m_Exp;
+    m_NextLevelExp = other.m_NextLevelExp;
+    m_Level = other.m_Level;
 }
+
 LogMsg* Hero::getLog()const {return m_Log;}
 WINDOW* Hero::getStatsWin()const{return m_StatsWin;}
 void Hero::addSkill(Skill *skill)
@@ -30,13 +49,11 @@ void Hero::addSkill(Skill *skill)
 }
 bool Hero::addItem(Item *item)
 {
-    if (m_Inventory.size() == inventoryMax)
-    {
-        m_Log->displayMsg("Inventory full");
+    if(!item)
         return false;
-    }
+    if (m_Inventory.size() == inventoryMax)
+        return false;
     m_Inventory.push_back(item);
-    m_Log->displayMsg("Picked up " + item->getName());
     return true;
 }
 void Hero::removeItem(size_t index){
@@ -45,38 +62,41 @@ void Hero::removeItem(size_t index){
 }
 void Hero::gainExp(int amount)
 {
+    int buff = 2;
     while ((m_Exp += amount) >= m_NextLevelExp)
     {
         m_Exp -= m_NextLevelExp;
         m_Level++;
         m_NextLevelExp += 20;
+        m_Stats += Stats{buff, buff, buff, buff, buff, buff};
+        m_Log->displayMsg("Level up!");
     }
 }
 void Hero::decreaseCooldown(){
     for(size_t i = 0; i < m_Skills.size(); i++)
         m_Skills.at(i)->decreaseCooldown();
 }
-bool Hero::useSkill(size_t index, Character *monster)
+void Hero::useSkill(size_t index, Character *monster)
 {
-    if (index >= m_Skills.size() || !m_Skills.at(index)){
+    // use all passive skills
+    for(Skill *skill: m_Skills)
+        if(skill->getType() == Skill::Type::PASSIVE && skill->getCurrCooldown() == 0){
+            skill->use(this, monster);
+            m_Log->displayMsg("Hero used " + skill->getName() + " passive skill");
+        }
+    // use active skill
+    if (index >= m_Skills.size() || !m_Skills.at(index))
         m_Log->displayMsg("No skill to use");
-        return false;
-    }
-    if (m_Skills.at(index)->getCurrCooldown() != 0)
-    {
-        // skill in cooldown
+    else if(m_Skills.at(index)->getType() == Skill::Type::PASSIVE)
+        m_Log->displayMsg("Cannot use passive skill");
+    else if (m_Skills.at(index)->getCurrCooldown() != 0)
         m_Log->displayMsg("Skill in cooldown, wait to next turn");
-        return false;
+    else if (m_Skills.at(index)->getCost() > m_CurrMana)
+        m_Log->displayMsg("Hero doesn't have enough mana");
+    else{
+        m_Skills.at(index)->use(this, monster);
+        m_Log->displayMsg("Hero used " + m_Skills.at(index)->getName() + " skill");
     }
-    if (m_Skills.at(index)->getCost() > m_CurrMana)
-    {
-        m_Log->displayMsg("Not enough mana");
-        // not enough mana
-        return false;
-    }
-    m_Skills.at(index)->use(this, monster);
-    m_Log->displayMsg("You used " + m_Skills.at(index)->getName() + " spell");
-    return true;
 }
 bool Hero::useItem(size_t index)
 {
@@ -96,34 +116,32 @@ bool Hero::useItem(size_t index)
 bool Hero::equip(Equipment *item, int type)
 {
     auto it = std::find(m_Inventory.begin(), m_Inventory.end(), item);
-    if (m_Equipments[type] != NULL)
-    {
+    if (m_Equipments[type] != nullptr)
         return false;
-    }
     m_Equipments[type] = dynamic_cast<Equipment *>(*it);
     m_Stats += m_Equipments[type]->getBuff();
-    *it = NULL;
+    *it = nullptr;
     return true;
 }
 bool Hero::unequip(size_t index)
 {
-    if(m_Equipments.at(index) == NULL){
+    if(m_Equipments.at(index) == nullptr){
         m_Log->displayMsg("No equipment to unequip");
         return false;
     }    
     if(this->addItem(m_Equipments.at(index))){
         m_Stats -= m_Equipments.at(index)->getBuff();
         m_Log->displayMsg("Unequip " + m_Equipments.at(index)->getName());
-        m_Equipments.at(index) = NULL;
+        m_Equipments.at(index) = nullptr;
         return true;
     }
     m_Log->displayMsg("Cannot unequip item");
     return false;
 }
 
-char Hero::move(WINDOW *win, int x, int y)
+char Hero::move(WINDOW *win, int margin, int x, int y)
 {
-    char target = mvwinch(win, y, x);
+    char target = mvwinch(win, y + margin, x + margin);
     if (target == '#')
     {
         // hit to a wall
@@ -156,23 +174,50 @@ char Hero::move(WINDOW *win, int x, int y)
     }
     return target;
 }
+void Hero::save(const std::string& filename)const{
+    std::ofstream outFile {"./map/" + filename + ".hero"};
+    if(!outFile)
+        throw "Cannot save to file" + filename;
+
+    outFile << "name=" << m_Name << std::endl;
+    outFile << "levelStats=" << m_Exp << " " << m_NextLevelExp << " " << m_Level << std::endl;
+    outFile << "currStats=" << m_CurrHP << " " << m_CurrMana << std::endl;
+
+    outFile << "inventory=";
+    for(auto item: m_Inventory)
+        if(item)
+            outFile << item->getCharacter() << ' ';
+    outFile << std::endl;
+
+    outFile << "equipment=";
+    for(auto equip: m_Equipments)
+        if(equip)
+            outFile << equip->getCharacter() << ' ';
+    outFile << std::endl;
+
+    if(outFile.bad())
+        throw "Cannot save to file" + filename;
+    outFile.close();
+}
 void Hero::addStatsWin(WINDOW* win){m_StatsWin = win;}
 void Hero::addLogWin(LogMsg *log) {m_Log = log;}
+void Hero:: displayControls(WINDOW* win) const{
+    werase(win);
+    box(win, 0, 0);
+    int line = 0;
+    mvwprintw(win, line++, 1, "Inventory keys");
+    line++;
+    mvwprintw(win, line++, 1, "Up-Down:  <arrow key>");
+    mvwprintw(win, line++, 1, "Use Item: <e>");
+    mvwprintw(win, line++, 1, "Unequip:  <e>");
+    mvwprintw(win, line++, 1, "Remove:   <x>");
+    mvwprintw(win, line++, 1, "Toggle:   <s>");
+    mvwprintw(win, line++, 1, "Close:    <i>");
+    wrefresh(win);
+}
 void Hero::openInventory(WINDOW *win, WINDOW *control)
 {
-
-    int line = 0;
-    werase(control);
-    box(control, 0, 0);
-    mvwprintw(control, line++, 1, "Control keys");
-    line++;
-    mvwprintw(control, line++, 1, "Select:     <arrow key>");
-    mvwprintw(control, line++, 1, "Use item:   <e>");
-    mvwprintw(control, line++, 1, "Unequip :   <e>");
-    mvwprintw(control, line++, 1, "Toggle tab: <s>");
-    mvwprintw(control, line++, 1, "Close:      <i>");
-    wrefresh(control);
-
+    this->displayControls(control);
     werase(win);
     wrefresh(win);
     box(win, 0, 0);
@@ -211,7 +256,8 @@ void Hero::openInventory(WINDOW *win, WINDOW *control)
                 if (m_Inventory.size() > 0 && this->useItem(selected)){
                     this->removeItem(selected);
                     selected--;
-                }
+                }else
+                    m_Log->displayMsg("Cannot use item");
                 break;
             case 'x':
                 if(m_Inventory.size() > 0){
@@ -300,7 +346,7 @@ void Hero::displayEquipment(WINDOW *win, WINDOW *detail, int selected, bool back
             if(m_Equipments.at(selected))
                 this->displayDetail(detail, m_Equipments.at(selected)->printDescription());
         }
-        if (m_Equipments.at(i) == NULL)
+        if (m_Equipments.at(i) == nullptr)
             mvwprintw(win, i + 1, 10, "Empty");
         else
             mvwprintw(win, i + 1, 10, "%s", m_Equipments.at(i)->getName().c_str());
@@ -329,23 +375,19 @@ void Hero::displayDetail(WINDOW* win, const std::string& description)const{
     mvwprintw(win, 0, 1, "Item detail");
     wrefresh(win);
 }
-void Hero::displayHero(WINDOW *win) const
-{
-    mvwaddch(win, m_Pos.m_Y, m_Pos.m_X, '@');
-}
 void Hero::displayStats() const
 {
     werase(m_StatsWin);
     box(m_StatsWin, 0, 0);
     int line = 0;
     mvwprintw(m_StatsWin, line++, 1, "Name: %s", m_Name.c_str());
-    line++;
     mvwprintw(m_StatsWin, line++, 1, "HP: %d / %d", m_Stats.getHP(), m_CurrHP);
     mvwprintw(m_StatsWin, line++, 1, "Mana: %d / %d", m_Stats.getMana(), m_CurrMana);
     mvwprintw(m_StatsWin, line++, 1, "Strength: %d", m_Stats.getStrength());
     mvwprintw(m_StatsWin, line++, 1, "Magic: %d", m_Stats.getMagic());
     mvwprintw(m_StatsWin, line++, 1, "Armor: %d", m_Stats.getArmor());
     mvwprintw(m_StatsWin, line++, 1, "Resistance: %d", m_Stats.getResistance());
+    line++;
     mvwprintw(m_StatsWin, line++, 1, "Exp: %d", m_Exp);
     mvwprintw(m_StatsWin, line++, 1, "Level: %d", m_Level);
     wrefresh(m_StatsWin);
@@ -355,27 +397,28 @@ void Hero::displaySkill(WINDOW *win) const
     werase(win);
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "Hero's skill");
+    std::string line;
+    int row = 1;
     for (size_t i = 0; i < m_Skills.size(); i++)
     {
-        mvwprintw(win, int(i + 1), 1, "%s %d %d",
-                  m_Skills.at(i)->getName().c_str(),
-                  m_Skills.at(i)->getCurrCooldown(),
-                  m_Skills.at(i)->getCost());
+        int col = 1;
+        line = m_Skills.at(i)->printDescription();
+        for(char i: line){
+            if(col >= getmaxx(win) - 1 || i == '\n'){
+                col = 1;
+                row++;
+            }
+            if(i != '\n'){
+                mvwaddch(win, row, col, i);
+                col++;
+            }
+        }
+        if(m_Skills.at(i)->getType() == Skill::Type::ACTIVE)
+            mvwprintw(win, ++row, 1, "Curr cooldown: %d", m_Skills.at(i)->getCurrCooldown());
+        else
+            mvwprintw(win, ++row, 1, "Passive skill");
+        row+=2;
     }
     wrefresh(win);
 }
-std::string Hero::toData() const
-{
-    std::stringstream res;
 
-    res << Character::toData()
-        << m_Exp << ',' << m_Level << '\n';
-
-    for (size_t i = 0; i < m_Inventory.size(); i++)
-        res << m_Inventory.at(i)->toData() << '\n';
-    for (size_t i = 0; i < m_Skills.size(); i++)
-        res << m_Skills.at(i)->toData() << '\n';
-    for (size_t i = 0; i < m_Equipments.size(); i++)
-        res << m_Equipments.at(i)->toData() << '\n';
-    return res.str();
-}

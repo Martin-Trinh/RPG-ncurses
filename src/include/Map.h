@@ -4,8 +4,8 @@
 #include <string>
 #include <ncurses.h>
 #include <vector>
-#include <set>
 #include <fstream>
+#include <iostream>
 
 #include "Item.h"
 #include "Potion.h"
@@ -17,34 +17,32 @@
 #include "LogMsg.h"
 #include "Gate.h"
 #include "AttackSkill.h"
-#include "HealSkill.h"
+#include "RegenSkill.h"
+#include "GameConfig.h"
 
 class Map{
 private:
-    std::vector<std::string> m_Map;
     static const int m_Margin = 2;
+    bool m_Winning = false;
+    std::vector<std::string> m_Map;
 
-    Hero * m_Hero = NULL;
+    Hero * m_Hero = nullptr;
     std::vector<Item*> m_Items;
     std::vector<Monster*> m_Monsters;
     std::vector<Gate*> m_Gates;
-
-    const std::set<char> m_CharItems {'^', 'p', 'b', 'w', 'o', 'h', 'm', 'e', '?'};
-    const std::set<char> m_CharMonster {'S', 'X'};
-
+    
+    GameConfig* m_GameConfig = nullptr;
 public:
-    Map(const std::string& mapFile);
+    Map(const std::string& mapFile, GameConfig* config);
     ~Map();
-    int save(const std::string& file);
-
-    void loadEntity(Hero* hero);
-    void addMonster(char tile, int x, int y);
-    void addItem(char tile, int x, int y);
-    size_t findItem(Position pos)const;
-    size_t findMonster(Position pos)const;
+    void save(const std::string& file);
+    void loadEntity(const std::string& heroName, bool newGame);
+    void loadHeroFromFile(const std::string& filename, GameConfig* config);
     bool combat(WINDOW* win, Hero* hero, Monster* monster);
+    void displayControl(WINDOW* win) const;
     int getKey(WINDOW* win, WINDOW* control);
     // getters
     Hero* getHero() const;
+    bool heroWon() const;
     void display(WINDOW* win);
 };

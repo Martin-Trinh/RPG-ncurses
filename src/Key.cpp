@@ -2,6 +2,12 @@
 
 Key::Key(const std::string& name, char character, int x, int y, std::vector<Gate*>* gates)
 :Item{name, character ,x, y}, m_Gates{gates}{}
+Key::~Key(){
+     m_Gates = nullptr;
+}
+Item* Key::clone() const{
+    return new Key(*this);
+}
 bool Key::use(Hero* hero, std::string& outMsg){
     auto it = std::find_if(m_Gates->begin(), m_Gates->end(), [hero](Gate* gate){
         return gate->getPos() == hero->getPos();
@@ -17,10 +23,5 @@ bool Key::use(Hero* hero, std::string& outMsg){
 std::string Key::printDescription()const {
     std::stringstream res;
     res << "Can be used to open gate(-) on map\n";
-    return res.str();
-}
-std::string Key:: toData() const{
-    std::stringstream res;
-    res << Item::toData();
     return res.str();
 }

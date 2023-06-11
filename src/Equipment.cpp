@@ -3,6 +3,7 @@
 Equipment::Equipment(const std::string &name, char character, int x, int y,
                      const Stats &buff)
     : Item{name, character, x, y}, m_Buff{buff} {}
+Item *Equipment::clone() const { return new Equipment(*this); }
 bool Equipment::use(Hero *hero, std::string &outMsg)
 {
     int type;
@@ -44,13 +45,6 @@ std::string Equipment::printDescription() const
         << "+ " << m_Buff.getMagic() << " magic\n"
         << "+ " << m_Buff.getArmor() << " armor\n"
         << "+ " << m_Buff.getResistance() << " resistance\n";
-    return res.str();
-}
-
-std::string Equipment::toData() const
-{
-    std::stringstream res;
-    res << Item::toData() << m_Buff.toData();
     return res.str();
 }
 const Stats &Equipment::getBuff() const { return m_Buff; }

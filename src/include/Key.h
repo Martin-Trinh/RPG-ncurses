@@ -11,7 +11,8 @@ private:
     std::vector<Gate*>* m_Gates;
 public:
     Key(const std::string& name, char character, int x, int y, std::vector<Gate*>* gates);
+    ~Key();
+    virtual Item* clone() const override;
     virtual bool use(Hero* hero, std::string& outMsg) override;
     virtual std::string printDescription()const override;
-    virtual std::string toData() const override;
 };

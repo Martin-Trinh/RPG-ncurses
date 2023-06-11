@@ -1,6 +1,6 @@
 LOGIN = trinhdin
 CXX = g++
-BASIC_FLAGS = -std=c++17 -O2 -g -fsanitize=undefined -Wall -pedantic
+BASIC_FLAGS = -std=c++17 -O2 -g -fsanitize=address -Wall -pedantic
 FLAGS = -lncurses
 
 ZIP = Makefile Doxyfile DOCUMENTATION.md zadani.txt prohlaseni.txt \
@@ -8,7 +8,7 @@ ZIP = Makefile Doxyfile DOCUMENTATION.md zadani.txt prohlaseni.txt \
 
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(patsubst src/%.cpp, build/%.o, ${SOURCES})
-DEPS = $(patsubst src/%.cpp, build/%.dep, ${SOURCES})
+DEP_FILE = dependencies.dep
 
 .PHONY: all compile run valgrind doc clean count zip
 
@@ -20,9 +20,12 @@ ${LOGIN}: ${OBJECTS}
 	@mkdir -p build/
 	${CXX} ${BASIC_FLAGS} ${FLAGS} $^ -o $@
 
-build/%.o: src/%.cpp 
+build/%.o: src/%.cpp
 	@mkdir -p build/
 	${CXX} ${BASIC_FLAGS} ${FLAGS} -c $< -o $@
+	@${CXX} -MM -MT "$@" $< > $(patsubst build/%.o, build/%.dep, $@)
+
+-include ${DEP_FILE}
 
 run: compile
 	./${LOGIN}
@@ -51,9 +54,3 @@ ${LOGIN}.zip: ${ZIP}
 	cp --parents -r $^ tmp/${LOGIN}/
 	cd tmp/ && zip -r ../$@ ${LOGIN}/
 	rm -rf tmp/
-
-build/%.dep: src/%.cpp src/*
-	@mkdir -p build/
-	${CXX} -MM -MT $(patsubst src/%.cpp, build/%.o, $<) $< > $@
-
-include ${DEPS}

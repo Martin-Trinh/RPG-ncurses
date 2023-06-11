@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Entity.h"
 #include "Item.h"
 #include "Hero.h"
 
@@ -11,7 +12,7 @@ private:
 public:
     Potion(const std::string& name, char character, int x, int y,
              int hp, int mana, int exp);
+    virtual Item* clone() const override;
     virtual bool use(Hero* hero, std::string& outMsg) override;
     virtual std::string printDescription()const override;
-    virtual std::string toData() const override;
 };

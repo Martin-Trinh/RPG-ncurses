@@ -10,15 +10,19 @@ private:
     int m_ExpWorth;
     char m_Character;
 public:
-    Monster(const std::string& name, int x, int y, const Stats &stats, 
-            Skill * skill, int expWorth, char character);
+    Monster(const std::string& name, char character, int x, int y, const Stats &stats, 
+            Skill * skill, int expWorth);
     ~Monster();
+    Monster(const Monster& other);
+    int getExp()const;
+    
     void findHero();
     void decreaseCooldown();
     bool useSkill(Character* hero, std::string& outMsg);
-    int getExp()const;
+
     void displayMonster(WINDOW * win) const;
-    std::string toData() const;
     void displayStats(WINDOW* win) const;
+    void displaySkills(WINDOW* win) const;
+    std::string toData() const;
 
 };

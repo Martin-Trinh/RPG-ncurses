@@ -6,31 +6,34 @@
 #include <string>
 #include <vector>
 
-#include "Hero.h"
-#include "Stats.h"
+#include "GameConfig.h"
 #include "Map.h"
+#include "Hero.h"
 #include "Potion.h"
-#include "Monster.h"
 #include "LogMsg.h"
-#include "Skill.h"
+#include "Item.h"
 #include "AttackSkill.h"
-#include "HealSkill.h"
+#include "RegenSkill.h"
+
 
 class Game{
 private:
-    WINDOW * m_Win;
-    Map * m_Map = NULL;
-    Hero * m_Hero = NULL;
+    Map * m_Map = nullptr;
+    GameConfig * m_GameConfig = nullptr;
+    bool m_Exit = false;
+    std::string m_DefaultMap = "map1";
+    std::string m_ConfigFile = "config1";
 public:
     Game();
     ~Game();
-    void run();
     void displayMenu();
-    void createHero();
-    bool loadGame(const std::string& file);
     void displayGame();
+    void createHero();
     void displayControl(WINDOW* win) const;
-    bool saveGame();
-    bool warning();
+    void getInput(const vecStr& Description, std::string& input);
+    void saveGame();
+    void loadGame();
+    bool warning()const;
+    void msgPopUp(const std::string& msg);
 
 };

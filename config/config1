@@ -1,0 +1,153 @@
+# define all skill first
+# use different character for each item/monster on map
+<AttackSkill>
+name=wizard attack
+cooldown=4
+cost=10
+damage=10
+magical=true
+type=active
+</AttackSkill>
+
+<AttackSkill>
+name=warrior attack
+cooldown=3
+cost=10
+damage=10
+magical=false
+type=active
+</AttackSkill>
+
+<AttackSkill>
+name=archer attack
+cooldown=1
+cost=10
+damage=5
+magical=false
+type=active
+</AttackSkill>
+
+<AttackSkill>
+name=passive burn
+cooldown=3
+cost=0
+damage=2
+magical=false
+type=passive
+</AttackSkill>
+
+<AttackSkill>
+name=spider attack
+cooldown=2
+cost=10
+damage=10
+magical=false
+type=active
+</AttackSkill>
+
+<RegenSkill>
+name=hero heal
+cooldown=2
+cost=10
+amount=20
+hp=true
+type=active
+</RegenSkill>
+
+<RegenSkill>
+name=monster heal
+cooldown=1
+cost=0
+amount=5
+hp=true
+type=passive
+</RegenSkill>
+
+<Hero>
+name=Wizard
+stats=100 100 3 10 3 5
+skills=wizard attack,hero heal
+</Hero>
+
+<Hero>
+name=Archer
+stats=100 100 10 0 11 1 
+skills=archer attack,hero heal,passive burn
+</Hero>
+
+<Hero>
+name=Warrior
+stats=100 100 10 5 3 2 
+skills=warrior attack,hero heal
+</Hero>
+
+
+<Monster>
+name=Slime
+stats=20 30 10 2 0 0
+skill=monster heal
+expWorth=10
+char=S
+</Monster>
+
+<Monster>
+name=Spider
+stats=50 30 10 2 5 0
+skill=spider attack
+expWorth=10
+char=X
+</Monster>
+
+<Equipment>
+name=helmet
+char=^
+stats=50 0 0 0 10 12
+</Equipment>
+
+<Equipment>
+name=plate
+char=p
+stats=200 0 0 0 20 5
+</Equipment>
+
+<Equipment>
+name=axe
+char=w
+stats=0 0 20 0 0 0
+</Equipment>
+
+<Equipment>
+name=boot
+char=b
+stats=0 0 10 5 0 0
+</Equipment>
+
+<Equipment>
+name=ring
+char=o
+stats=0 100 0 0 10 8
+</Equipment>
+
+<Potion>
+name=health potion
+char=h
+hp=10
+mana=0
+exp=0
+</Potion>
+
+<Potion>
+name=mana potion
+char=m
+hp=0
+mana=10
+exp=0
+</Potion>
+
+<Potion>
+name=exp potion
+char=e
+hp=0
+mana=0
+exp=10
+</Potion>

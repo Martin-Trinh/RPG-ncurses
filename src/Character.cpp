@@ -1,33 +1,32 @@
 #include "include/Character.h"
 
-Character::Character(const std::string &name, int x, int y, const Stats &stats)
-    : m_Name{name}, m_Pos{x, y}, m_Stats{stats}
+Character::Character(const std::string &name, char character, int x, int y, const Stats &stats)
+: Entity{name, character, x, y}, m_Stats{stats}
 {
     m_CurrHP = m_Stats.getHP();
     m_CurrMana = m_Stats.getMana();
 }
-
-Position Character:: getPos() const {return m_Pos;}
-
-std::string Character::toData() const
-{
-    std::stringstream res;
-    res << m_Name << ","
-        << m_Pos.toData()
-        << m_Stats.toData()
-        << m_CurrHP << "," << m_CurrMana;
-    return res.str();
-}
+const Stats& Character:: getStats() const {return m_Stats;}
+int Character::getCurrHP() const{return m_CurrHP;}
+int Character::getCurrMana() const{return m_CurrMana;}
 
 void Character::attack(Character *other, int damage, bool magical)
 {
     if (magical)
     {
-        other->m_CurrHP -= (damage + other->m_Stats.getResistance());
+        damage += m_Stats.getMagic();
+        damage -= other->m_Stats.getResistance();
+        if(damage < 0)
+            damage = 0;
+        other->m_CurrHP -= damage;
     }
     else
     {
-        other->m_CurrHP -= (damage - other->m_Stats.getArmor());
+        damage += m_Stats.getStrength();
+        damage -= other->m_Stats.getArmor();
+        if(damage < 0)
+            damage = 0;
+        other->m_CurrHP -= damage;
     }
     if (other->m_CurrHP < 0)
         other->m_CurrHP = 0;
@@ -51,6 +50,3 @@ void Character::increaseMana(int amount){
     if(m_CurrMana > m_Stats.getMana())
         m_CurrMana = m_Stats.getMana();
 }
-int Character::getCurrHP() const{return m_CurrHP;}
-int Character::getCurrMana() const{return m_CurrMana;}
-const std::string& Character:: getName()const{return m_Name;}

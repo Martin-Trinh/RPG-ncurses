@@ -38,14 +38,6 @@ Stats &Stats::operator-=(const Stats &rhs)
   return *this;
 }
 
-std::string Stats::toData() const
-{
-  std::stringstream res;
-  res << m_HP << ","
-      << m_Mana << ","
-      << m_Strength << ","
-      << m_Magic << ","
-      << m_Armor << ","
-      << m_Resistance;
-  return res.str();
+void Stats::loadStats(std::istringstream& iss){
+    iss >> m_HP >> m_Mana >> m_Strength >> m_Magic >> m_Armor >> m_Resistance;
 }

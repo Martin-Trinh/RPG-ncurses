@@ -3,7 +3,9 @@
 Potion::Potion(const std::string& name, char character,int x, int y,
                  int hp, int mana, int exp)
 :Item{name, character ,x, y}, m_HP{hp}, m_Mana{mana}, m_Exp{exp}{}
-
+Item* Potion::clone() const{
+    return new Potion(*this);
+}
 bool Potion::use(Hero* hero, std::string& outMsg){
     std::stringstream res;
     if(m_HP != 0){
@@ -27,11 +29,5 @@ std::string Potion::printDescription() const
     res << "+ " << m_HP << " max HP\n"
         << "+ " << m_Mana << " max mana\n"
         << "+ " << m_Exp << " Exp\n";
-    return res.str();
-}
-std::string Potion::toData()const{
-    std::stringstream res;
-    res << Item::toData() 
-        << m_HP << ',' << m_Mana << ',' << m_Exp;
     return res.str();
 }
