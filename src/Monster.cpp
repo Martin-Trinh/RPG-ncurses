@@ -23,6 +23,7 @@ bool Monster::useSkill(Character* hero, std::string& outMsg){
         // not enough mana
         return false;
     }
+    m_CurrMana -= m_Skill->getCost();
     outMsg = m_Name + " used " + m_Skill->getName() + " skill";
     m_Skill->use(this, hero);
     return true;

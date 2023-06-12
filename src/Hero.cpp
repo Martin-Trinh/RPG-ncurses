@@ -94,6 +94,7 @@ void Hero::useSkill(size_t index, Character *monster)
         m_Log->displayMsg("Hero doesn't have enough mana");
     else{
         m_Skills.at(index)->use(this, monster);
+        m_CurrMana -= m_Skills.at(index)->getCost();
         m_Log->displayMsg("Hero used " + m_Skills.at(index)->getName() + " skill");
     }
 }

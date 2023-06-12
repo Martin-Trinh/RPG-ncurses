@@ -1,28 +1,29 @@
 LOGIN = trinhdin
 CXX = g++
-BASIC_FLAGS = -std=c++17 -O2 -g -fsanitize=address -Wall -pedantic -Wextra
-FLAGS = -lncurses
+LD = g++
+BASIC_FLAGS = -std=c++17 -O2 -g -fsanitize=address -Wall -pedantic
+LIB_FLAGS = -lncurses
 
 ZIP = Makefile Doxyfile zadani.txt prohlaseni.txt \
   .gitignore $(wildcard examples/*) $(wildcard src/*)
 
+DEPS = Makefile.d
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(patsubst src/%.cpp, build/%.o, ${SOURCES})
-DEPS = $(patsubst src/%.cpp, build/%.dep, ${SOURCES})
 
 .PHONY: all compile run valgrind doc clean zip
 
 all: compile doc
 
-compile: ${LOGIN}
+compile: deps ${LOGIN}
 
 ${LOGIN}: ${OBJECTS}
 	@mkdir -p build/
-	${CXX} ${BASIC_FLAGS} ${FLAGS} $^ -o $@
+	${LD} ${BASIC_FLAGS} ${LIB_FLAGS} $^ -o $@
 
 build/%.o: src/%.cpp 
 	@mkdir -p build/
-	${CXX} ${BASIC_FLAGS} ${FLAGS} -c $< -o $@
+	${CXX} ${BASIC_FLAGS} ${LIB_FLAGS} -c $< -o $@
 
 run: compile
 	./${LOGIN}
@@ -35,7 +36,7 @@ doc:
 
 clean:
 	rm -rf build doc
-	rm -f ${LOGIN} ${LOGIN}.zip
+	rm -f ${LOGIN} ${LOGIN}.zip ${DEPS}
 
 zip: ${LOGIN}.zip
 
@@ -47,9 +48,8 @@ ${LOGIN}.zip: ${ZIP}
 	cd tmp/ && zip -r ../$@ ${LOGIN}/
 	rm -rf tmp/
 
-build/%.dep: src/%.cpp src/*
-	@mkdir -p build/
-	${CXX} -MM -MT $(patsubst src/%.cpp, build/%.o, $<) $< > $@
+deps: 
+	${CXX} -MM ${SOURCES} > ${DEPS}
 
-include ${DEPS}
+-include ${DEPS}
 

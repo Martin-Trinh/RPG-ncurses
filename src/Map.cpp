@@ -80,7 +80,7 @@ void Map::loadEntity(const std::string& heroName, bool newGame){
 }
 // save map to file
 void Map::save(const std::string& mapFile){
-    std::ofstream outFile {"./examples/maps" + mapFile + ".map"};
+    std::ofstream outFile {"./examples/maps/" + mapFile + ".map"};
     if(!outFile.is_open())
         throw "Cannot open file " + mapFile;
 
